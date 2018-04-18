@@ -58,7 +58,7 @@ def main(argv):
         parser.print_help()
         sys.exit(2)
         
-   # logging.debug ("filepath: %s   filename:%s" %(filepath ,filename))
+
 
     Parse(filepath, filename)
 
@@ -69,11 +69,18 @@ def Parse(filepath, filename):
     files=filepath+"/"+filename
     logging.debug ("File:{0}".format(files))
    
-
+    MainSheet="general_report" # hardcoded for main issues?
     
     wb= openpyxl.load_workbook(files)
     types=type(wb)
     logging.debug ("Type:{0}".format(types))
+    sheets=wb.get_sheet_names()
+    logging.debug ("Sheets:{0}".format(sheets))
+    CurrentSheet=wb[MainSheet] 
+    logging.debug ("CurrentSheet:{0}".format(CurrentSheet))
+    logging.debug ("First row:{0}".format(CurrentSheet['A4'].value))
+
+
     logging.debug ("--Python exiting--")
 
 if __name__ == "__main__":
