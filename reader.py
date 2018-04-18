@@ -80,8 +80,16 @@ def Parse(filepath, filename):
     logging.debug ("CurrentSheet:{0}".format(CurrentSheet))
     logging.debug ("First row:{0}".format(CurrentSheet['A4'].value))
 
-
+    for cell in CurrentSheet['A']:
+        logging.debug  ("Row value:{0}".format(cell.value))
     logging.debug ("--Python exiting--")
+
+    mylist = []
+    for row in CurrentSheet[('A{}:A{}'.format(5,CurrentSheet.max_row))]:
+        for cell in row:
+            mylist.append(cell.value)
+    print mylist
+
 
 if __name__ == "__main__":
    main(sys.argv[1:]) 
