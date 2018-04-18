@@ -80,16 +80,22 @@ def Parse(filepath, filename):
     logging.debug ("CurrentSheet:{0}".format(CurrentSheet))
     logging.debug ("First row:{0}".format(CurrentSheet['A4'].value))
 
-    for cell in CurrentSheet['A']:
-        logging.debug  ("Row value:{0}".format(cell.value))
-    logging.debug ("--Python exiting--")
+    DATASTARTSROW=5
+    #for cell in CurrentSheet['A']:
+    #    logging.debug  ("Row value:{0}".format(cell.value))
+   
 
     mylist = []
-    for row in CurrentSheet[('A{}:A{}'.format(5,CurrentSheet.max_row))]:
-        for cell in row:
-            mylist.append(cell.value)
+    i=DATASTARTSROW # brute force row indexing
+    for row in CurrentSheet[('B{}:B{}'.format(DATASTARTSROW,CurrentSheet.max_row))]:
+        for mycell in row:
+            mylist.append(mycell.value)
+            logging.debug("ROW:{0} Original ID:{1}".format(i,mycell.value))
+            logging.debug("Attachment:{0}".format((CurrentSheet.cell(row=i, column=11).value))) #K=11
+            logging.debug("---------------------------------------------------")
+            i=i+1
     print mylist
-
-
+    print((CurrentSheet.cell(row=4, column=3)).value) #K=11
+logging.debug ("--Python exiting--")
 if __name__ == "__main__":
    main(sys.argv[1:]) 
