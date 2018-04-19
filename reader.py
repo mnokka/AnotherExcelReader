@@ -111,6 +111,11 @@ def Parse(filepath, filename):
     print "--------------"
     print Issues
     print Issues.items() 
+    key=18503
+    if key in Issues:
+        print "EXISTS"
+    else:
+        print "NOT THERE"
     #print((CurrentSheet.cell(row=4, column=3)).value) #K=11
     
 logging.debug ("--Python exiting--")
