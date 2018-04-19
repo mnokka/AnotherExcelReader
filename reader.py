@@ -86,39 +86,40 @@ def Parse(filepath, filename):
 
     #CONFIGURATIONS
     DATASTARTSROW=5 # data section starting line
-    K=11
-    G=6
+    #EXCEL COLUMN MAPPINGS
+    K=11 #LINKED_ISSUES 
+    G=7 #REPORTER
+    C=3 # SUMMARY
     #for cell in CurrentSheet['A']:
     #    logging.debug  ("Row value:{0}".format(cell.value))
-    # EXCEL COLUMN MAPPINGS:
-    # B=KEY, K=LINKED_ISSUES (11), G=REPORTER (6)
-    
+  
     
     mylist = []
 
     i=DATASTARTSROW # brute force row indexing
     for row in CurrentSheet[('B{}:B{}'.format(DATASTARTSROW,CurrentSheet.max_row))]:  # go trough all column B (KEY) rows
         for mycell in row:
-            mylist.append(mycell.value)
+            #mylist.append(mycell.value)
             KEY=mycell.value
             logging.debug("ROW:{0} Original ID:{1}".format(i,mycell.value))
             Issues[KEY]={} # add to dictionary as master key (KEY)
             
-            LINKED_ISSUES=(CurrentSheet.cell(row=i, column=11).value)
-            logging.debug("Attachment:{0}".format((CurrentSheet.cell(row=i, column=K).value))) # for the same row, show also column K (LINKED_ISSUES) values
+            LINKED_ISSUES=(CurrentSheet.cell(row=i, column=K).value)
+            #logging.debug("Attachment:{0}".format((CurrentSheet.cell(row=i, column=K).value))) # for the same row, show also column K (LINKED_ISSUES) values
             Issues[KEY]["LINKED_ISSUES"] = LINKED_ISSUES
             
-            REPORTER=(CurrentSheet.cell(row=i, column=11).value)
-            logging.debug("Attachment:{0}".format((CurrentSheet.cell(row=i, column=G).value))) # for the same row, show also column K (LINKED_ISSUES) values
+            REPORTER=(CurrentSheet.cell(row=i, column=G).value)
             Issues[KEY]["REPORTER"] = REPORTER
+            
+            SUMMARY=(CurrentSheet.cell(row=i, column=C).value)
+            Issues[KEY]["SUMMARY"] = SUMMARY
             
             logging.debug("---------------------------------------------------")
             i=i+1
     #print mylist # could collect all needed values to data structure
-    print "--------------"
     #print Issues
     print Issues.items() 
-    key=18503
+    key=18503 # check if this key exists
     if key in Issues:
         print "EXISTS"
     else:
