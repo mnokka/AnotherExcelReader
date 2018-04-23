@@ -94,9 +94,29 @@ def Parse(filepath, filename):
     ########################################
     #CONFIGURATIONS AND EXCEL COLUMN MAPPINGS
     DATASTARTSROW=5 # data section starting line
-    K=11 #LINKED_ISSUES 
-    G=7 #REPORTER
     C=3 #SUMMARY
+    D=4 #Issue Type
+    E=5 #Status Always "Open"    
+    G=7 #REPORTER
+    H=8 #Creator
+    I=9 #Created --> Original Created date in Jira
+    K=11 #LINKED_ISSUES 
+    M=12 #Shipnumber
+    Q=16 #PerformerNW
+    R=17 #ResponsibleNW
+    U=20 #Responsible Phone Number --> Not taken, field just exists in Jira
+    W=22 #DepartmentNW
+    X=23 #Block
+    Z=25 # Link to Cronodoc, not taken, field just exists in Jira
+    AA=26 #DeckNW
+    
+    
+    
+    
+    
+   
+
+    
     #for cell in CurrentSheet['A']:
     #    logging.debug  ("Row value:{0}".format(cell.value))
   
@@ -114,6 +134,7 @@ def Parse(filepath, filename):
             logging.debug("ROW:{0} Original ID:{1}".format(i,mycell.value))
             Issues[KEY]={} # add to dictionary as master key (KEY)
             
+            #Just hardocode operations, POC is one off
             LINKED_ISSUES=(CurrentSheet.cell(row=i, column=K).value) #NOTE THIS APPROACH GOES ALWAYS TO THE FIRST SHEET
             #logging.debug("Attachment:{0}".format((CurrentSheet.cell(row=i, column=K).value))) # for the same row, show also column K (LINKED_ISSUES) values
             Issues[KEY]["LINKED_ISSUES"] = LINKED_ISSUES
@@ -123,6 +144,44 @@ def Parse(filepath, filename):
             
             SUMMARY=(CurrentSheet.cell(row=i, column=C).value)
             Issues[KEY]["SUMMARY"] = SUMMARY
+            
+            ISSUE_TYPE=(CurrentSheet.cell(row=i, column=D).value)
+            Issues[KEY]["ISSUE_TYPE"] = ISSUE_TYPE
+            
+            STATUS=(CurrentSheet.cell(row=i, column=E).value)
+            Issues[KEY]["STATUS"] = STATUS
+            
+            CREATOR=(CurrentSheet.cell(row=i, column=H).value)
+            Issues[KEY]["CREATOR"] = CREATOR
+            
+            CREATED=(CurrentSheet.cell(row=i, column=I).value)
+            Issues[KEY]["CREATED"] = CREATED
+            
+            SHIP=(CurrentSheet.cell(row=i, column=M).value)
+            Issues[KEY]["SHIP"] = SHIP
+            
+            PERFORMER=(CurrentSheet.cell(row=i, column=Q).value)
+            Issues[KEY]["PERFORMER"] = PERFORMER
+            
+            RESPONSIBLE=(CurrentSheet.cell(row=i, column=R).value)
+            Issues[KEY]["RESPONSIBLE"] = RESPONSIBLE
+            
+            RESPHONE=(CurrentSheet.cell(row=i, column=U).value)
+            Issues[KEY]["RESPHONE"] = RESPHONE
+            
+            DEPARTMENT=(CurrentSheet.cell(row=i, column=W).value)
+            Issues[KEY]["DEPARTMENT"] = DEPARTMENT
+            
+            BLOCK=(CurrentSheet.cell(row=i, column=X).value)
+            Issues[KEY]["BLOCK"] = BLOCK
+            
+            CRONO=(CurrentSheet.cell(row=i, column=Z).value)
+            Issues[KEY]["CRONO"] = CRONO
+            
+            DECK=(CurrentSheet.cell(row=i, column=AA).value)
+            Issues[KEY]["DECK"] = DECK
+            
+            
             
             #Create sub dictionary for possible subtasks (to be used later)
             Issues[KEY]["REMARKS"]={}
@@ -161,7 +220,7 @@ def Parse(filepath, filename):
     
             
     i=DATASTARTSROW # brute force row indexing
-    for row in SubSheet1[('B{}:B{}'.format(DATASTARTSROW,SubSheet1.max_row))]:  # go trough all column B (KEY) rows
+    for row in SubSheet1[('B{}:B{}'.format(DATASTARTSROW,SubSheet1.max_row))]:  # go trough all column B (KEY which is BGR number) rows
         for mycell in row:
             KEY=mycell.value
             logging.debug("ROW:{0} Original ID:{1}".format(i,KEY))
@@ -173,11 +232,19 @@ def Parse(filepath, filename):
                 #Issues[KEY]["REMARKS"]={}
                 Issues[KEY]["REMARKS"][REMARKKEY] = {}
                 
+                
+                # Just hardcode operattions, POC is one off
                 DECK=SubSheet1['S{0}'.format(i)].value  # column S holds BGR numbers
                 Issues[KEY]["REMARKS"][REMARKKEY]["DECK"] = DECK
-                logging.debug("i:{0} DECK:{1} REMARKKEY:{2}".format(i,DECK,REMARKKEY))
+                #logging.debug("i:{0} DECK:{1} REMARKKEY:{2}".format(i,DECK,REMARKKEY))
+                BLOCK=SubSheet1['R{0}'.format(i)].value  # column R holds BLOCK info
+                Issues[KEY]["REMARKS"][REMARKKEY]["BLOCK"] = BLOCK
+                
+                NUMBEROF=SubSheet1['K{0}'.format(i)].value  # column K holds number of remarks
+                Issues[KEY]["REMARKS"][REMARKKEY]["NUMBEROF"] = NUMBEROF
+                
             else:
-                print "Error: Unknown parent found"
+                print "ERROR: Unknown parent found"
         print "----------------------------------"
         i=i+1
 
@@ -186,12 +253,15 @@ def Parse(filepath, filename):
         print "1)Linked issues:{0}".format(Issues[key]["LINKED_ISSUES"])
         print "2)Reporter:{0}".format(Issues[key]["REPORTER"])
         print "3)Remarks:{0}".format(Issues[key]["REMARKS"])
+        
         Remarks=Issues[key]["REMARKS"] # take a copy of remarks and use it
         print "-------------------------------------------------------------------------"
         for subkey , subvalue in Remarks.iteritems():
             #print subkey, subvalue
             print "    Remark key:{0}".format(subkey)
             print "    A) DECK:{0}".format(Remarks[subkey]["DECK"])
+            print "    A) BLOCK:{0}".format(Remarks[subkey]["BLOCK"])
+            print "    A) NUMBEROF:{0}".format(Remarks[subkey]["NUMBEROF"])
             
         print "*************************************************************************"
         
