@@ -2,17 +2,21 @@
 
 # POC tool to read Excel using Python
 # Data will be used to create subtasks / add attachments to Jira main issues
+# Created either via this tool or Excel import plugin
+# 
+#
 #
 # Author mika.nokka1@gmail.com for Ambientia
-#TODO 
+#
+# TODO 
 # Use Pandas instead?
 #
 #from __future__ import unicode_literals
 
 import openpyxl 
-import getopt,sys, logging
+import sys, logging
 import argparse
-import re
+#import re
 from collections import defaultdict
 
 __version__ = "0.1.1394"
@@ -24,8 +28,6 @@ logging.basicConfig(level=logging.DEBUG) # IF calling from Groovy, this must be 
 
 def main(argv):
     
-    filepath=''
-    filename=''
 
   
     logging.debug ("--Python starting Excel reading --") 
@@ -65,7 +67,13 @@ def main(argv):
 
 
 ############################################################################################################################################
-#
+# Parse excel and create dictionary of
+# 1) Jira main issue data
+# 2) Jira subtask(s) (remark(s)) data for main issue
+# 3) Info of attachment for main issue (to be added using inhouse tooling
+#  
+#NOTE: Uses hardcoded sheet/column value
+
 def Parse(filepath, filename):
     logging.debug ("Filepath: %s     Filename:%s" %(filepath ,filename))
     files=filepath+"/"+filename
@@ -73,30 +81,32 @@ def Parse(filepath, filename):
    
     Issues=defaultdict(dict) 
 
-    
-    MainSheet="general_report" # hardcoded for main issues?
-    
+    MainSheet="general_report" 
     wb= openpyxl.load_workbook(files)
-    types=type(wb)
+    #types=type(wb)
     #logging.debug ("Type:{0}".format(types))
-    sheets=wb.get_sheet_names()
+    #sheets=wb.get_sheet_names()
     #logging.debug ("Sheets:{0}".format(sheets))
     CurrentSheet=wb[MainSheet] 
     #logging.debug ("CurrentSheet:{0}".format(CurrentSheet))
     #logging.debug ("First row:{0}".format(CurrentSheet['A4'].value))
 
-    #CONFIGURATIONS
+    ########################################
+    #CONFIGURATIONS AND EXCEL COLUMN MAPPINGS
     DATASTARTSROW=5 # data section starting line
-    #EXCEL COLUMN MAPPINGS
     K=11 #LINKED_ISSUES 
     G=7 #REPORTER
-    C=3 # SUMMARY
+    C=3 #SUMMARY
     #for cell in CurrentSheet['A']:
     #    logging.debug  ("Row value:{0}".format(cell.value))
   
     
     ##############################################################################################
     #Go through main excel sheet for main issue keys (and contents findings)
+    # Create dictionary structure (remarks)
+    # NOTE: Uses hardcoded sheet/column values
+    # NOTE: As this handles first sheet, using used row/cell reading (buggy, works only for first sheet) 
+    #
     i=DATASTARTSROW # brute force row indexing
     for row in CurrentSheet[('B{}:B{}'.format(DATASTARTSROW,CurrentSheet.max_row))]:  # go trough all column B (KEY) rows
         for mycell in row:
@@ -121,17 +131,19 @@ def Parse(filepath, filename):
             i=i+1
     #print Issues
     print Issues.items() 
-    key=18503 # check if this key exists
-    if key in Issues:
-        print "EXISTS"
-    else:
-        print "NOT THERE"
-    for key, value in Issues.iteritems() :
-        print key, value
+    
+    #key=18503 # check if this key exists
+    #if key in Issues:
+    #    print "EXISTS"
+    #else:
+    #    print "NOT THERE"
+    #for key, value in Issues.iteritems() :
+    #    print key, value
 
     ############################################################################################################################
     # Check any remarks (subtasks) for main issue
-    
+    # NOTE: Uses hardcoded sheet/column values
+    #
     RemarksSheet="Tabelle2" # hardcoded for main issues?
     SubSheet1=wb[RemarksSheet]
 
@@ -170,9 +182,21 @@ def Parse(filepath, filename):
         i=i+1
 
     for key, value in Issues.iteritems() :
-        print key, value
+        print "ORIGINAL ISSUE KEY:{0}\nVALUE:{1}".format(key, value)
+        print "1)Linked issues:{0}".format(Issues[key]["LINKED_ISSUES"])
+        print "2)Reporter:{0}".format(Issues[key]["REPORTER"])
+        print "3)Remarks:{0}".format(Issues[key]["REMARKS"])
+        Remarks=Issues[key]["REMARKS"] # take a copy of remarks and use it
+        print "-------------------------------------------------------------------------"
+        for subkey , subvalue in Remarks.iteritems():
+            #print subkey, subvalue
+            print "    Remark key:{0}".format(subkey)
+            print "    A) DECK:{0}".format(Remarks[subkey]["DECK"])
+            
+        print "*************************************************************************"
+        
 
     
 logging.debug ("--Python exiting--")
 if __name__ == "__main__":
-   main(sys.argv[1:]) 
+    main(sys.argv[1:]) 
