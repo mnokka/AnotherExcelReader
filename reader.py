@@ -114,6 +114,9 @@ def Parse(filepath, filename):
             SUMMARY=(CurrentSheet.cell(row=i, column=C).value)
             Issues[KEY]["SUMMARY"] = SUMMARY
             
+            #Create sub dictionary for possible subtasks (to be used later)
+            Issues[KEY]["REMARKS"]={}
+            
             logging.debug("---------------------------------------------------")
             i=i+1
     #print Issues
@@ -155,7 +158,7 @@ def Parse(filepath, filename):
                 print "Subtask has a known parent."
                 #BGR=(SubSheet1.cell(row=i, column=J).value) # This approach takes always values from the first sheet of excel 
                 REMARKKEY=SubSheet1['J{0}'.format(i)].value  # column J holds BGR numbers
-                Issues[KEY]["REMARKS"]={}
+                #Issues[KEY]["REMARKS"]={}
                 Issues[KEY]["REMARKS"][REMARKKEY] = {}
                 
                 DECK=SubSheet1['S{0}'.format(i)].value  # column S holds BGR numbers
