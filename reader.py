@@ -18,7 +18,9 @@ import sys, logging
 import argparse
 #import re
 from collections import defaultdict
-
+from CreateIssue import Authenticate  # no need to use as external command
+from CreateIssue import DoJIRAStuff
+ 
 __version__ = "0.1.1394"
 
 
@@ -28,7 +30,10 @@ logging.basicConfig(level=logging.DEBUG) # IF calling from Groovy, this must be 
 
 def main(argv):
     
-
+    JIRASERVICE=""
+    JIRAPROJECT=""
+    PSWD=''
+    USER=''
   
     logging.debug ("--Python starting Excel reading --") 
 
@@ -42,9 +47,15 @@ def main(argv):
 
     """.format(__version__,sys.argv[0]))
 
-    parser.add_argument('-p','--filepath', help='<Path to Excel file directory>')
+    parser.add_argument('-f','--filepath', help='<Path to Excel file directory>')
     parser.add_argument('-n','--filename', help='<Excel filename>')
     parser.add_argument('-v','--version', help='<Version>', action='store_true')
+    
+    parser.add_argument('-w','--password', help='<JIRA password>')
+    parser.add_argument('-u','--user', help='<JIRA user>')
+    parser.add_argument('-s','--service', help='<JIRA service>')
+    parser.add_argument('-p','--project', help='<JIRA project>')
+   
         
     args = parser.parse_args()
     
@@ -55,15 +66,19 @@ def main(argv):
     filepath = args.filepath or ''
     filename = args.filename or ''
     
+    JIRASERVICE = args.service or ''
+    JIRAPROJECT = args.project or ''
+    PSWD= args.password or ''
+    USER= args.user or ''
     
     # quick old-school way to check needed parameters
-    if (filepath=='' or  filename=='' ):
+    if (filepath=='' or  filename=='' or JIRASERVICE=='' or  JIRAPROJECT==''  or PSWD=='' or USER=='' ):
         parser.print_help()
         sys.exit(2)
         
 
 
-    Parse(filepath, filename)
+    Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER)
 
 
 ############################################################################################################################################
@@ -74,7 +89,7 @@ def main(argv):
 #  
 #NOTE: Uses hardcoded sheet/column value
 
-def Parse(filepath, filename):
+def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
     logging.debug ("Filepath: %s     Filename:%s" %(filepath ,filename))
     files=filepath+"/"+filename
     logging.debug ("File:{0}".format(files))
@@ -277,11 +292,14 @@ def Parse(filepath, filename):
             #print subkey, subvalue
             print "    Remark key:{0}".format(subkey)
             print "    A) DECK:{0}".format(Remarks[subkey]["DECK"])
-            print "    A) BLOCK:{0}".format(Remarks[subkey]["BLOCK"])
-            print "    A) NUMBEROF:{0}".format(Remarks[subkey]["NUMBEROF"])
+            print "    B) BLOCK:{0}".format(Remarks[subkey]["BLOCK"])
+            print "    C) NUMBEROF:{0}".format(Remarks[subkey]["NUMBEROF"])
             
         print "*************************************************************************"
         
+
+    Authenticate(JIRASERVICE,PSWD,USER)
+    DoJIRAStuff(USER,PSWD,JIRASERVICE)
 
     
 logging.debug ("--Python exiting--")
