@@ -144,8 +144,33 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION):
     try:
         new_issue = jiraobj.create_issue(fields=issue_dict)
     except Exception,e:
-        print("Failed to create JIRA project, error: %s" % e)
+        print("Failed to create JIRA object, error: %s" % e)
         sys.exit(1)
+    return new_issue 
+
+############################################################################################'
+# Quick way to create subtask
+#
+def CreateSubTask(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,PARENT):
+    jiraobj=jira
+    project=JIRAPROJECT
+    print "Creating subtask for JIRA project: {0} Parent:{1}".format(project,PARENT)
+    issue_dict = {
+    'project': {'key': JIRAPROJECT},
+    'summary': JIRASUMMARY,
+    'description': JIRADESCRIPTION,
+    'issuetype': {'name': 'Sub-task'}, 
+    'parent' : { 'id' : str(PARENT)},   # PARENT is an object, convert
+    }
+
+
+    try:
+        new_issue = jiraobj.create_issue(fields=issue_dict)
+    except Exception,e:
+        print("Failed to create JIRA object, error: %s" % e)
+        sys.exit(1)
+    return new_issue 
+
         
 if __name__ == "__main__":
         main(sys.argv[1:])

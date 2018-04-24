@@ -19,7 +19,7 @@ import argparse
 #import re
 from collections import defaultdict
 from CreateIssue import Authenticate  # no need to use as external command
-from CreateIssue import DoJIRAStuff
+from CreateIssue import DoJIRAStuff, CreateSubTask
 from CreateIssue import CreateIssue 
  
 __version__ = "0.1.1394"
@@ -267,6 +267,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
     Authenticate(JIRASERVICE,PSWD,USER)
     jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
 
+    #create main issues
     for key, value in Issues.iteritems() :
         print "ORIGINAL ISSUE KEY:{0}\nVALUE:{1}".format(key, value)
         print "1)LINKED_ISSUES:{0}".format(Issues[key]["LINKED_ISSUES"])
@@ -290,16 +291,24 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
         JIRASUMMARY=(Issues[key]["SUMMARY"]).encode('utf-8')          
         JIRASUMMARY=JIRASUMMARY.replace("\n", " ") # Perl used to have chomp, this was only Python way to do this
    
-        CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION)
+        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION)
+        print "Issue:{0}".format(IssueID)
+        #print "IssueKey:{0}".format(IssueID.key)
         
         Remarks=Issues[key]["REMARKS"] # take a copy of remarks and use it
         print "-------------------------------------------------------------------------"
+        PARENT=IssueID
+        #create subtask(s) under one parent
         for subkey , subvalue in Remarks.iteritems():
             #print subkey, subvalue
             print "    Remark key:{0}".format(subkey)
             print "    A) DECK:{0}".format(Remarks[subkey]["DECK"])
             print "    B) BLOCK:{0}".format(Remarks[subkey]["BLOCK"])
             print "    C) NUMBEROF:{0}".format(Remarks[subkey]["NUMBEROF"])
+            JIRASUMMARY="Subtask for BGR:{0}".format(subkey)
+            JIRADESCRIPTION="BLOCK:{0}    DECK:{1}".format(Remarks[subkey]["BLOCK"],Remarks[subkey]["DECK"])
+            SubIssueID=CreateSubTask(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,PARENT)
+            print "Subtask:{0}".format(SubIssueID)
             
         print "*************************************************************************"
         
