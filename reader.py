@@ -20,6 +20,7 @@ import argparse
 from collections import defaultdict
 from CreateIssue import Authenticate  # no need to use as external command
 from CreateIssue import DoJIRAStuff
+from CreateIssue import CreateIssue 
  
 __version__ = "0.1.1394"
 
@@ -263,6 +264,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
         print "----------------------------------"
         i=i+1
 
+    Authenticate(JIRASERVICE,PSWD,USER)
+    jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
+
     for key, value in Issues.iteritems() :
         print "ORIGINAL ISSUE KEY:{0}\nVALUE:{1}".format(key, value)
         print "1)LINKED_ISSUES:{0}".format(Issues[key]["LINKED_ISSUES"])
@@ -282,9 +286,11 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
         print "15)CRONO:{0}".format(Issues[key]["CRONO"])          
         print "16)DECK:{0}".format(Issues[key]["DECK"])      
    
+        JIRADESCRIPTION="Inspection Report"
+        JIRASUMMARY=(Issues[key]["SUMMARY"]).encode('utf-8')          
+        JIRASUMMARY=JIRASUMMARY.replace("\n", " ") # Perl used to have chomp, this was only Python way to do this
    
-                    
-        
+        CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION)
         
         Remarks=Issues[key]["REMARKS"] # take a copy of remarks and use it
         print "-------------------------------------------------------------------------"
@@ -298,8 +304,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
         print "*************************************************************************"
         
 
-    Authenticate(JIRASERVICE,PSWD,USER)
-    DoJIRAStuff(USER,PSWD,JIRASERVICE)
+ 
+  
 
     
 logging.debug ("--Python exiting--")
