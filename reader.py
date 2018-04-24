@@ -21,6 +21,7 @@ from collections import defaultdict
 from CreateIssue import Authenticate  # no need to use as external command
 from CreateIssue import DoJIRAStuff, CreateSubTask
 from CreateIssue import CreateIssue 
+import glob
  
 __version__ = "0.1.1394"
 
@@ -294,6 +295,15 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
         IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION)
         print "Issue:{0}".format(IssueID)
         #print "IssueKey:{0}".format(IssueID.key)
+        
+        filesx=filepath+"/*{0}*".format(key)
+        print "filesx:{0}".format(filesx)
+        
+        attachments=glob.glob("{0}".format(filesx))
+        print "globbed:{0}".format(attachments)
+        
+
+        
         
         Remarks=Issues[key]["REMARKS"] # take a copy of remarks and use it
         print "-------------------------------------------------------------------------"
