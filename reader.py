@@ -250,9 +250,26 @@ def Parse(filepath, filename):
 
     for key, value in Issues.iteritems() :
         print "ORIGINAL ISSUE KEY:{0}\nVALUE:{1}".format(key, value)
-        print "1)Linked issues:{0}".format(Issues[key]["LINKED_ISSUES"])
-        print "2)Reporter:{0}".format(Issues[key]["REPORTER"])
-        print "3)Remarks:{0}".format(Issues[key]["REMARKS"])
+        print "1)LINKED_ISSUES:{0}".format(Issues[key]["LINKED_ISSUES"])
+        print "2)REPORTER:{0}".format(Issues[key]["REPORTER"])
+        print "3)REMARKS:{0}".format(Issues[key]["REMARKS"])
+        print "4)SUMMARY:{0}".format((Issues[key]["SUMMARY"]).encode('utf-8'))
+        print "5)ISSUE_TYPE:{0}".format((Issues[key]["ISSUE_TYPE"]).encode('utf-8'))    
+        print "6)STATUS:{0}".format(Issues[key]["STATUS"])  
+        print "7)CREATOR:{0}".format(Issues[key]["CREATOR"])  
+        print "8)CREATED:{0}".format(Issues[key]["CREATED"]) 
+        print "9)SHIP:{0}".format(Issues[key]["SHIP"]) 
+        print "10)PERFORMER:{0}".format(Issues[key]["PERFORMER"])    
+        print "11)RESPONSIBLE:{0}".format(Issues[key]["RESPONSIBLE"])         
+        print "12)RESPHONE:{0}".format(Issues[key]["RESPHONE"])     
+        print "13)DEPARTMENT:{0}".format(Issues[key]["DEPARTMENT"])      
+        print "14)BLOCK:{0}".format(Issues[key]["BLOCK"])     
+        print "15)CRONO:{0}".format(Issues[key]["CRONO"])          
+        print "16)DECK:{0}".format(Issues[key]["DECK"])      
+   
+   
+                    
+        
         
         Remarks=Issues[key]["REMARKS"] # take a copy of remarks and use it
         print "-------------------------------------------------------------------------"
