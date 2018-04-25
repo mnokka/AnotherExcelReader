@@ -22,6 +22,7 @@ from CreateIssue import Authenticate  # no need to use as external command
 from CreateIssue import DoJIRAStuff, CreateSubTask
 from CreateIssue import CreateIssue 
 import glob
+
  
 __version__ = "0.1.1394"
 
@@ -291,8 +292,23 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
         JIRADESCRIPTION="Inspection Report"
         JIRASUMMARY=(Issues[key]["SUMMARY"]).encode('utf-8')          
         JIRASUMMARY=JIRASUMMARY.replace("\n", " ") # Perl used to have chomp, this was only Python way to do this
+        KEY=key
+        REPORTER=Issues[key]["REPORTER"]
+        CREATOR=Issues[key]["CREATOR"]
+        CREATED=Issues[key]["CREATED"] # 30.1.2018  9:32:15 fromat from excel
+        
+        #(CREATED.isoformat()
+        #time=(CREATED.isoformat())#.strftime("%Y-%m-%dT%H:%M:%S.000-0300")
+        #print "ISOFORMAT TIME1:{0}".format(time)
+        
+        time2=CREATED.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
+        print "CREATED ISOFORMAT TIME2:{0}".format(time2)
+        
+        CREATED=time2
+       #strftime("%Y-%m-%dT%H:%M:%S.%f+0000")
+        
    
-        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION)
+        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,REPORTER,CREATOR,CREATED)
         print "Issue:{0}".format(IssueID)
         #print "IssueKey:{0}".format(IssueID.key)
         
@@ -301,10 +317,10 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
         
         
         attachments=glob.glob("{0}".format(filesx))
-        if (len(attachments) > 0): # if any attachment wiht key embedded to name
+        if (len(attachments) > 0): # if any attachment with key embedded to name found
             print "Found attachments for key:{0}".format(IssueID)
             print "Found these:{0}".format(attachments)
-            for item in attachments:
+            for item in attachments: # add them all
                 jira.add_attachment(issue=IssueID, attachment=attachments[0])
                 print "Attachment:{0} added".format(item)
         else:

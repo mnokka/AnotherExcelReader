@@ -20,7 +20,7 @@ import requests
 requests.packages.urllib3.disable_warnings()
 import itertools, re, sys
 from jira import JIRA
-
+import random
 
 
 __version__ = "0.1"
@@ -130,15 +130,33 @@ def DoJIRAStuff(user,PASSWORD,JIRASERVICE):
  return jira   
     
 ####################################################################################
-def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION):
+def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTER,CREATED):
     jiraobj=jira
     project=JIRAPROJECT
+    
+    lottery = random.randint(1,3)
+    
+    if (lottery==1):
+        TASKTYPE="Steal"
+    elif (lottery>1):
+        TASKTYPE="Outfitting"
+    else:
+        TASKTYPE="Task"
+    
     print "Creating issue for JIRA project: {0}".format(project)
+    
     issue_dict = {
     'project': {'key': JIRAPROJECT},
     'summary': JIRASUMMARY,
     'description': JIRADESCRIPTION,
-    'issuetype': {'name': 'Task'},
+    'issuetype': {'name': TASKTYPE},
+    'customfield_12317': str(KEY),  # Key in ALM demo
+    'customfield_12318': str(CREATOR),  # Reporter in ALM demo
+    'customfield_12319': str(REPORTER),  # Creator in ALM demo
+    #'customfield_12320': "2015-07-03T14:08:00.000-0500",  # Original Created Time in ALM demo      2018-04-25T11:06:04+00:00
+    #'customfield_12320': "2018-04-25T11:06:04.000-0500",
+    #'customfield_12320': "2018-04-25T12:01:00.043847+0000",
+    'customfield_12320': str(CREATED),
     }
 
     try:
@@ -160,7 +178,7 @@ def CreateSubTask(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,PARENT):
     'project': {'key': JIRAPROJECT},
     'summary': JIRASUMMARY,
     'description': JIRADESCRIPTION,
-    'issuetype': {'name': 'Sub-task'}, 
+    'issuetype': {'name': 'Remark1'}, #  is a Sub-task type CHANGE FOR target system
     'parent' : { 'id' : str(PARENT)},   # PARENT is an object, convert
     }
 
