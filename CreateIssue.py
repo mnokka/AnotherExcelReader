@@ -130,7 +130,7 @@ def DoJIRAStuff(user,PASSWORD,JIRASERVICE):
  return jira   
     
 ####################################################################################
-def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTER,CREATED):
+def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTER,CREATED,SHIP,PERFOMER,RESPONSIBLE,BLOCK,DECK,DEPARTMENT):
     jiraobj=jira
     project=JIRAPROJECT
     
@@ -153,10 +153,13 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTE
     'customfield_12317': str(KEY),  # Key in ALM demo
     'customfield_12318': str(CREATOR),  # Reporter in ALM demo
     'customfield_12319': str(REPORTER),  # Creator in ALM demo
-    #'customfield_12320': "2015-07-03T14:08:00.000-0500",  # Original Created Time in ALM demo      2018-04-25T11:06:04+00:00
-    #'customfield_12320': "2018-04-25T11:06:04.000-0500",
-    #'customfield_12320': "2018-04-25T12:01:00.043847+0000",
-    'customfield_12320': str(CREATED),
+    'customfield_12320': str(CREATED),  # Original Created Time in ALM demo
+    'customfield_12321': str(SHIP), # Ship Number in ALM demo
+    'customfield_12322': str(PERFOMER), # PerformerNW in ALM demo
+    'customfield_12323': str(RESPONSIBLE), # ResponsibleNW in ALM demo
+    'customfield_12324': str(BLOCK), # BlockNW in ALM demo
+    'customfield_12326': str(DECK), # DeckNW in ALM demo
+    'customfield_12328': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
     }
 
     try:

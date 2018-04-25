@@ -296,19 +296,20 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
         REPORTER=Issues[key]["REPORTER"]
         CREATOR=Issues[key]["CREATOR"]
         CREATED=Issues[key]["CREATED"] # 30.1.2018  9:32:15 fromat from excel
+        SHIP=Issues[key]["SHIP"]
+        PERFORMER=Issues[key]["PERFORMER"]
+        BLOCK=Issues[key]["BLOCK"]
+        DEPARTMENT=Issues[key]["DEPARTMENT"]
+        DECK=Issues[key]["DECK"]
         
-        #(CREATED.isoformat()
-        #time=(CREATED.isoformat())#.strftime("%Y-%m-%dT%H:%M:%S.000-0300")
-        #print "ISOFORMAT TIME1:{0}".format(time)
-        
+        # ISO 8601 conversion to Exceli time
         time2=CREATED.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
         print "CREATED ISOFORMAT TIME2:{0}".format(time2)
-        
         CREATED=time2
-       #strftime("%Y-%m-%dT%H:%M:%S.%f+0000")
+
         
    
-        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,REPORTER,CREATOR,CREATED)
+        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,REPORTER,CREATOR,CREATED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK)
         print "Issue:{0}".format(IssueID)
         #print "IssueKey:{0}".format(IssueID.key)
         
