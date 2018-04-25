@@ -299,10 +299,16 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
         filesx=filepath+"/*{0}*".format(key)
         print "filesx:{0}".format(filesx)
         
-        attachments=glob.glob("{0}".format(filesx))
-        print "globbed:{0}".format(attachments)
         
-
+        attachments=glob.glob("{0}".format(filesx))
+        if (len(attachments) > 0): # if any attachment wiht key embedded to name
+            print "Found attachments for key:{0}".format(IssueID)
+            print "Found these:{0}".format(attachments)
+            for item in attachments:
+                jira.add_attachment(issue=IssueID, attachment=attachments[0])
+                print "Attachment:{0} added".format(item)
+        else:
+            print "NO attachments  found for key:{0}".format(IssueID)
         
         
         Remarks=Issues[key]["REMARKS"] # take a copy of remarks and use it

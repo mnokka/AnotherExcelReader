@@ -143,6 +143,7 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION):
 
     try:
         new_issue = jiraobj.create_issue(fields=issue_dict)
+        print "Issue created OK"
     except Exception,e:
         print("Failed to create JIRA object, error: %s" % e)
         sys.exit(1)
@@ -166,6 +167,7 @@ def CreateSubTask(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,PARENT):
 
     try:
         new_issue = jiraobj.create_issue(fields=issue_dict)
+        print "Subtask created OK"
     except Exception,e:
         print("Failed to create JIRA object, error: %s" % e)
         sys.exit(1)
