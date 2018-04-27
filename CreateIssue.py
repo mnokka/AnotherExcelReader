@@ -134,14 +134,17 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTE
     jiraobj=jira
     project=JIRAPROJECT
     
-    lottery = random.randint(1,3)
     
-    if (lottery==1):
-        TASKTYPE="Steal"
-    elif (lottery>1):
-        TASKTYPE="Outfitting"
-    else:
-        TASKTYPE="Task"
+    #lottery = random.randint(1,3)
+    #if (lottery==1):
+    #    TASKTYPE="Steal"
+    #elif (lottery>1):
+    #    TASKTYPE="Outfitting"
+    #else:
+    #    TASKTYPE="Task"
+    
+    TASKTYPE="Hull Inspection NW"
+    #TASKTYPE="Task"
     
     print "Creating issue for JIRA project: {0}".format(project)
     
@@ -150,16 +153,29 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTE
     'summary': JIRASUMMARY,
     'description': JIRADESCRIPTION,
     'issuetype': {'name': TASKTYPE},
-    'customfield_12317': str(KEY),  # Key in ALM demo
-    'customfield_12318': str(CREATOR),  # Reporter in ALM demo
-    'customfield_12319': str(REPORTER),  # Creator in ALM demo
-    'customfield_12320': str(CREATED),  # Original Created Time in ALM demo
-    'customfield_12321': str(SHIP), # Ship Number in ALM demo
-    'customfield_12322': str(PERFOMER), # PerformerNW in ALM demo
-    'customfield_12323': str(RESPONSIBLE), # ResponsibleNW in ALM demo
-    'customfield_12324': str(BLOCK), # BlockNW in ALM demo
-    'customfield_12326': str(DECK), # DeckNW in ALM demo
-    'customfield_12328': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
+    #'customfield_12317': str(KEY),  # Key in ALM demo
+    #'customfield_12318': str(CREATOR),  # Reporter in ALM demo
+    #'customfield_12319': str(REPORTER),  # Creator in ALM demo
+    #'customfield_12320': str(CREATED),  # Original Created Time in ALM demo
+    #'customfield_12321': str(SHIP), # Ship Number in ALM demo
+    #'customfield_12322': str(PERFOMER), # PerformerNW in ALM demo
+    #'customfield_12323': str(RESPONSIBLE), # ResponsibleNW in ALM demo
+    #'customfield_12324': str(BLOCK), # BlockNW in ALM demo
+    #'customfield_12326': str(DECK), # DeckNW in ALM demo
+    #'customfield_12328': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
+    #PROD:
+    'customfield_12900': str(KEY),  # Key in ALM demo
+    'customfield_12902': str(CREATOR),  # Reporter in ALM demo
+    'customfield_12901': str(REPORTER),  # Creator in ALM demo
+    'customfield_12903': str(CREATED),  # Original Created Time in ALM demo
+    'customfield_12904': str(SHIP), # Ship Number in ALM demo
+    'customfield_12905': str(PERFOMER), # PerformerNW in ALM demo
+    'customfield_12906': str(RESPONSIBLE), # ResponsibleNW in ALM demo
+    'customfield_12907': str(BLOCK), # BlockNW in ALM demo
+    'customfield_12908': str(DECK), # DeckNW in ALM demo
+    'customfield_12909': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
+    
+    
     }
 
     try:
@@ -176,12 +192,15 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTE
 def CreateSubTask(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,PARENT):
     jiraobj=jira
     project=JIRAPROJECT
+    #SUBTASKTYPE="Remark1"
+    SUBTASKTYPE="Hull Remark"
     print "Creating subtask for JIRA project: {0} Parent:{1}".format(project,PARENT)
     issue_dict = {
     'project': {'key': JIRAPROJECT},
     'summary': JIRASUMMARY,
     'description': JIRADESCRIPTION,
-    'issuetype': {'name': 'Remark1'}, #  is a Sub-task type CHANGE FOR target system
+    #'issuetype': {'name': 'Remark1'}, #  is a Sub-task type CHANGE FOR target system
+    'issuetype': {'name': SUBTASKTYPE}, 
     'parent' : { 'id' : str(PARENT)},   # PARENT is an object, convert
     }
 
