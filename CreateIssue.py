@@ -130,7 +130,7 @@ def DoJIRAStuff(user,PASSWORD,JIRASERVICE):
  return jira   
     
 ####################################################################################
-def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTER,CREATED,SHIP,PERFOMER,RESPONSIBLE,BLOCK,DECK,DEPARTMENT):
+def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,SHIP,PERFOMER,RESPONSIBLE,BLOCK,DECK,DEPARTMENT):
     jiraobj=jira
     project=JIRAPROJECT
     
@@ -152,7 +152,7 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTE
     'issuetype': {'name': TASKTYPE},
     'customfield_12317': str(KEY),  # Key in ALM demo
     'customfield_12318': str(CREATOR),  # Reporter in ALM demo
-    'customfield_12319': str(REPORTER),  # Creator in ALM demo
+    #'customfield_12319': str(REPORTER),  # Creator in ALM demo
     'customfield_12320': str(CREATED),  # Original Created Time in ALM demo
     'customfield_12321': str(SHIP), # Ship Number in ALM demo
     'customfield_12322': str(PERFOMER), # PerformerNW in ALM demo

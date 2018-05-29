@@ -24,7 +24,7 @@ from CreateIssue import CreateIssue
 import glob
 
  
-__version__ = "0.1.1394"
+__version__ = "0.2.1394"
 
 
 logging.basicConfig(level=logging.DEBUG) # IF calling from Groovy, this must be set logging level DEBUG in Groovy side order these to be written out
@@ -115,18 +115,19 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
     C=3 #SUMMARY
     D=4 #Issue Type
     E=5 #Status Always "Open"    
-    G=7 #REPORTER
+    G=7 #ResponsibleNW
     H=8 #Creator
-    I=9 #Created --> Original Created date in Jira
-    K=11 #LINKED_ISSUES 
-    M=12 #Shipnumber
-    Q=16 #PerformerNW
-    R=17 #ResponsibleNW
-    U=20 #Responsible Phone Number --> Not taken, field just exists in Jira
-    W=22 #DepartmentNW
-    X=23 #Block
-    Z=25 # Link to Cronodoc, not taken, field just exists in Jira
-    AA=26 #DeckNW
+    I=9 #Inspection date --> Original Created date in Jira
+    #K=11 #LINKED_ISSUES 
+    M=13 #Shipnumber
+    P=16 #PerformerNW
+    #Q=17 #ResponsibleNW
+    #U=20 #Responsible Phone Number --> Not taken, field just exists in Jira
+    S=19 #DepartmentNW
+    V=22 #Deck
+    W=23 #Block
+    X=24 # Firezone
+    #AA=26 #DeckNW
     
     
     
@@ -153,14 +154,13 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
             Issues[KEY]={} # add to dictionary as master key (KEY)
             
             #Just hardocode operations, POC is one off
-            LINKED_ISSUES=(CurrentSheet.cell(row=i, column=K).value) #NOTE THIS APPROACH GOES ALWAYS TO THE FIRST SHEET
+            #LINKED_ISSUES=(CurrentSheet.cell(row=i, column=K).value) #NOTE THIS APPROACH GOES ALWAYS TO THE FIRST SHEET
             #logging.debug("Attachment:{0}".format((CurrentSheet.cell(row=i, column=K).value))) # for the same row, show also column K (LINKED_ISSUES) values
-            Issues[KEY]["LINKED_ISSUES"] = LINKED_ISSUES
-            
-            REPORTER=(CurrentSheet.cell(row=i, column=G).value)
-            Issues[KEY]["REPORTER"] = REPORTER
+            #Issues[KEY]["LINKED_ISSUES"] = LINKED_ISSUES
             
             SUMMARY=(CurrentSheet.cell(row=i, column=C).value)
+            if not SUMMARY:
+                SUMMARY="Summary for this task has not been defined"
             Issues[KEY]["SUMMARY"] = SUMMARY
             
             ISSUE_TYPE=(CurrentSheet.cell(row=i, column=D).value)
@@ -169,35 +169,42 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
             STATUS=(CurrentSheet.cell(row=i, column=E).value)
             Issues[KEY]["STATUS"] = STATUS
             
+            RESPONSIBLE=(CurrentSheet.cell(row=i, column=G).value)
+            Issues[KEY]["RESPONSIBLE"] = RESPONSIBLE.encode('utf8')
+            
+            #REPORTER=(CurrentSheet.cell(row=i, column=G).value)
+            #Issues[KEY]["REPORTER"] = REPORTER
+            
+            
             CREATOR=(CurrentSheet.cell(row=i, column=H).value)
             Issues[KEY]["CREATOR"] = CREATOR
             
-            CREATED=(CurrentSheet.cell(row=i, column=I).value)
+            CREATED=(CurrentSheet.cell(row=i, column=I).value) #Inspection date
             Issues[KEY]["CREATED"] = CREATED
             
             SHIP=(CurrentSheet.cell(row=i, column=M).value)
             Issues[KEY]["SHIP"] = SHIP
             
-            PERFORMER=(CurrentSheet.cell(row=i, column=Q).value)
-            Issues[KEY]["PERFORMER"] = PERFORMER
+            PERFORMER=(CurrentSheet.cell(row=i, column=P).value)
+            Issues[KEY]["PERFORMER"] = PERFORMER.encode('utf8')
             
-            RESPONSIBLE=(CurrentSheet.cell(row=i, column=R).value)
-            Issues[KEY]["RESPONSIBLE"] = RESPONSIBLE
+              
+            #RESPHONE=(CurrentSheet.cell(row=i, column=U).value)
+            #Issues[KEY]["RESPHONE"] = RESPHONE
             
-            RESPHONE=(CurrentSheet.cell(row=i, column=U).value)
-            Issues[KEY]["RESPHONE"] = RESPHONE
-            
-            DEPARTMENT=(CurrentSheet.cell(row=i, column=W).value)
+            DEPARTMENT=(CurrentSheet.cell(row=i, column=S).value)
             Issues[KEY]["DEPARTMENT"] = DEPARTMENT
             
-            BLOCK=(CurrentSheet.cell(row=i, column=X).value)
+            DECK=(CurrentSheet.cell(row=i, column=V).value)
+            Issues[KEY]["DECK"] = DECK
+            
+            BLOCK=(CurrentSheet.cell(row=i, column=W).value)
             Issues[KEY]["BLOCK"] = BLOCK
             
-            CRONO=(CurrentSheet.cell(row=i, column=Z).value)
-            Issues[KEY]["CRONO"] = CRONO
+            FIREZONE=(CurrentSheet.cell(row=i, column=X).value)
+            Issues[KEY]["FIREZONE"] = FIREZONE
             
-            DECK=(CurrentSheet.cell(row=i, column=AA).value)
-            Issues[KEY]["DECK"] = DECK
+            
             
             
             
@@ -221,50 +228,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
     # Check any remarks (subtasks) for main issue
     # NOTE: Uses hardcoded sheet/column values
     #
-    RemarksSheet="Tabelle2" # hardcoded for main issues?
-    SubSheet1=wb[RemarksSheet]
-
-    
-    # Find KTR keyword, after which subtasks are defined
-    i=1
-    for row in SubSheet1[('A{}:A{}'.format(SubSheet1.min_row,SubSheet1.max_row))]:  # go trough all column B (KEY) rows    
-        for mycell in row:
-            TMP=mycell.value
-            #logging.debug("ROW:{0} Value:{1}".format(i,mycell.value))
-            if TMP=="KTR":
-                DATASTARTSROW=i+1 # this line includes first subtask definition
-                break # TODO fix logic
-            i=i+1
-    
-            
-    i=DATASTARTSROW # brute force row indexing
-    for row in SubSheet1[('B{}:B{}'.format(DATASTARTSROW,SubSheet1.max_row))]:  # go trough all column B (KEY which is BGR number) rows
-        for mycell in row:
-            KEY=mycell.value
-            logging.debug("ROW:{0} Original ID:{1}".format(i,KEY))
-            if KEY in Issues: 
-              
-                print "Subtask has a known parent."
-                #BGR=(SubSheet1.cell(row=i, column=J).value) # This approach takes always values from the first sheet of excel 
-                REMARKKEY=SubSheet1['J{0}'.format(i)].value  # column J holds BGR numbers
-                #Issues[KEY]["REMARKS"]={}
-                Issues[KEY]["REMARKS"][REMARKKEY] = {}
-                
-                
-                # Just hardcode operattions, POC is one off
-                DECK=SubSheet1['S{0}'.format(i)].value  # column S holds BGR numbers
-                Issues[KEY]["REMARKS"][REMARKKEY]["DECK"] = DECK
-                #logging.debug("i:{0} DECK:{1} REMARKKEY:{2}".format(i,DECK,REMARKKEY))
-                BLOCK=SubSheet1['R{0}'.format(i)].value  # column R holds BLOCK info
-                Issues[KEY]["REMARKS"][REMARKKEY]["BLOCK"] = BLOCK
-                
-                NUMBEROF=SubSheet1['K{0}'.format(i)].value  # column K holds number of remarks
-                Issues[KEY]["REMARKS"][REMARKKEY]["NUMBEROF"] = NUMBEROF
-                
-            else:
-                print "ERROR: Unknown parent found"
-        print "----------------------------------"
-        i=i+1
+    #removed currently dfue excel changes
 
     Authenticate(JIRASERVICE,PSWD,USER)
     jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
@@ -272,8 +236,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
     #create main issues
     for key, value in Issues.iteritems() :
         print "ORIGINAL ISSUE KEY:{0}\nVALUE:{1}".format(key, value)
-        print "1)LINKED_ISSUES:{0}".format(Issues[key]["LINKED_ISSUES"])
-        print "2)REPORTER:{0}".format(Issues[key]["REPORTER"])
+        #print "1)LINKED_ISSUES:{0}".format(Issues[key]["LINKED_ISSUES"])
+        #print "2)REPORTER:{0}".format(Issues[key]["REPORTER"])
         print "3)REMARKS:{0}".format(Issues[key]["REMARKS"])
         print "4)SUMMARY:{0}".format((Issues[key]["SUMMARY"]).encode('utf-8'))
         print "5)ISSUE_TYPE:{0}".format((Issues[key]["ISSUE_TYPE"]).encode('utf-8'))    
@@ -281,22 +245,25 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
         print "7)CREATOR:{0}".format(Issues[key]["CREATOR"])  
         print "8)CREATED:{0}".format(Issues[key]["CREATED"]) 
         print "9)SHIP:{0}".format(Issues[key]["SHIP"]) 
-        print "10)PERFORMER:{0}".format(Issues[key]["PERFORMER"])    
-        print "11)RESPONSIBLE:{0}".format(Issues[key]["RESPONSIBLE"])         
-        print "12)RESPHONE:{0}".format(Issues[key]["RESPHONE"])     
+        print "10)PERFORMER:{0}".format(Issues[key]["PERFORMER"]) #.encode('utf8'))    
+        print "11)RESPONSIBLE:{0}".format(Issues[key]["RESPONSIBLE"]) #.encode('utf8'))         
+        #print "12)RESPHONE:{0}".format(Issues[key]["RESPHONE"])     
         print "13)DEPARTMENT:{0}".format(Issues[key]["DEPARTMENT"])      
         print "14)BLOCK:{0}".format(Issues[key]["BLOCK"])     
-        print "15)CRONO:{0}".format(Issues[key]["CRONO"])          
+        #print "15)CRONO:{0}".format(Issues[key]["CRONO"])          
         print "16)DECK:{0}".format(Issues[key]["DECK"])      
+        print "16)FIREZONE:{0}".format(Issues[key]["FIREZONE"])
    
         JIRADESCRIPTION="Inspection Report"
         JIRASUMMARY=(Issues[key]["SUMMARY"]).encode('utf-8')          
         JIRASUMMARY=JIRASUMMARY.replace("\n", " ") # Perl used to have chomp, this was only Python way to do this
+        JIRASUMMARY=JIRASUMMARY[:254] ## summary max length is 255
         KEY=key
-        REPORTER=Issues[key]["REPORTER"]
+        #REPORTER=Issues[key]["REPORTER"]
         CREATOR=Issues[key]["CREATOR"]
         CREATED=Issues[key]["CREATED"] # 30.1.2018  9:32:15 fromat from excel
         SHIP=Issues[key]["SHIP"]
+        RESPONSIBLE=Issues[key]["RESPONSIBLE"]
         PERFORMER=Issues[key]["PERFORMER"]
         BLOCK=Issues[key]["BLOCK"]
         DEPARTMENT=Issues[key]["DEPARTMENT"]
@@ -309,7 +276,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
 
         
    
-        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,REPORTER,CREATOR,CREATED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK)
+        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK)
         print "Issue:{0}".format(IssueID)
         #print "IssueKey:{0}".format(IssueID.key)
         
