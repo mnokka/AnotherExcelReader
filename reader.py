@@ -117,7 +117,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
     E=5 #Status Always "Open"    
     G=7 #ResponsibleNW
     H=8 #Creator
-    I=9 #Inspection date --> Original Created date in Jira
+    I=9 #Inspection date --> Original Created date in Jira Changed as Inspection Date
     #K=11 #LINKED_ISSUES 
     M=13 #Shipnumber
     P=16 #PerformerNW
@@ -170,7 +170,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
             Issues[KEY]["STATUS"] = STATUS
             
             RESPONSIBLE=(CurrentSheet.cell(row=i, column=G).value)
-            Issues[KEY]["RESPONSIBLE"] = RESPONSIBLE.encode('utf8')
+            Issues[KEY]["RESPONSIBLE"] = RESPONSIBLE.encode('utf-8')
             
             #REPORTER=(CurrentSheet.cell(row=i, column=G).value)
             #Issues[KEY]["REPORTER"] = REPORTER
@@ -186,7 +186,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
             Issues[KEY]["SHIP"] = SHIP
             
             PERFORMER=(CurrentSheet.cell(row=i, column=P).value)
-            Issues[KEY]["PERFORMER"] = PERFORMER.encode('utf8')
+            Issues[KEY]["PERFORMER"] = PERFORMER.encode('utf-8')
             
               
             #RESPHONE=(CurrentSheet.cell(row=i, column=U).value)
@@ -268,15 +268,19 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
         BLOCK=Issues[key]["BLOCK"]
         DEPARTMENT=Issues[key]["DEPARTMENT"]
         DECK=Issues[key]["DECK"]
+        DECK=DECK.encode('utf-8') 
+        ISSUETYPE=Issues[key]["ISSUE_TYPE"]
+
         
         # ISO 8601 conversion to Exceli time
         time2=CREATED.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
         print "CREATED ISOFORMAT TIME2:{0}".format(time2)
         CREATED=time2
+        INSPECTED=CREATED # just reusing value
 
         
    
-        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK)
+        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE)
         print "Issue:{0}".format(IssueID)
         #print "IssueKey:{0}".format(IssueID.key)
         
