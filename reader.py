@@ -51,7 +51,8 @@ def main(argv):
     """.format(__version__,sys.argv[0]))
 
     parser.add_argument('-f','--filepath', help='<Path to Excel file directory>')
-    parser.add_argument('-n','--filename', help='<Excel filename>')
+    parser.add_argument('-n','--filename', help='<Main tasks Excel filename>')
+    parser.add_argument('-m','--subfilename', help='<Subtasks Excel filename>')
     parser.add_argument('-v','--version', help='<Version>', action='store_true')
     
     parser.add_argument('-w','--password', help='<JIRA password>')
@@ -68,6 +69,7 @@ def main(argv):
            
     filepath = args.filepath or ''
     filename = args.filename or ''
+    subfilename=args.subfilename or ''
     
     JIRASERVICE = args.service or ''
     JIRAPROJECT = args.project or ''
@@ -75,13 +77,13 @@ def main(argv):
     USER= args.user or ''
     
     # quick old-school way to check needed parameters
-    if (filepath=='' or  filename=='' or JIRASERVICE=='' or  JIRAPROJECT==''  or PSWD=='' or USER=='' ):
+    if (filepath=='' or  filename=='' or JIRASERVICE=='' or  JIRAPROJECT==''  or PSWD=='' or USER=='' or subfilename==''):
         parser.print_help()
         sys.exit(2)
         
 
 
-    Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER)
+    Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename)
 
 
 ############################################################################################################################################
@@ -92,7 +94,7 @@ def main(argv):
 #  
 #NOTE: Uses hardcoded sheet/column value
 
-def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
+def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
     logging.debug ("Filepath: %s     Filename:%s" %(filepath ,filename))
     files=filepath+"/"+filename
     logging.debug ("File:{0}".format(files))
@@ -109,15 +111,36 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
     #logging.debug ("CurrentSheet:{0}".format(CurrentSheet))
     #logging.debug ("First row:{0}".format(CurrentSheet['A4'].value))
 
+
+    #subtasks
+    logging.debug ("Filepath: %s     Filename:%s" %(filepath ,subfilename))
+    subfiles=filepath+"/"+subfilename
+    logging.debug ("SubFiles:{0}".format(subfiles))
+   
+    
+    SubMainSheet="general_report" 
+    subwb= openpyxl.load_workbook(subfiles)
+    #types=type(wb)
+    #logging.debug ("Type:{0}".format(types))
+    #sheets=wb.get_sheet_names()
+    #logging.debug ("Sheets:{0}".format(sheets))
+    SubCurrentSheet=subwb[SubMainSheet] 
+    #logging.debug ("CurrentSheet:{0}".format(CurrentSheet))
+    #logging.debug ("First row:{0}".format(CurrentSheet['A4'].value))
+
+
+
     ########################################
     #CONFIGURATIONS AND EXCEL COLUMN MAPPINGS
-    DATASTARTSROW=5 # data section starting line
+    DATASTARTSROW=5 # data section starting line MAIN TASKS EXCEL
+    DATASTARTSROWSUB=5 # data section starting line SUB TASKS EXCEL
     C=3 #SUMMARY
     D=4 #Issue Type
     E=5 #Status Always "Open"    
     G=7 #ResponsibleNW
     H=8 #Creator
     I=9 #Inspection date --> Original Created date in Jira Changed as Inspection Date
+    J=10 # Subtask TASK-ID
     #K=11 #LINKED_ISSUES 
     M=13 #Shipnumber
     P=16 #PerformerNW
@@ -127,7 +150,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
     V=22 #Deck
     W=23 #Block
     X=24 # Firezone
-    #AA=26 #DeckNW
+    AA=27 #Subtask DeckNW
     
     
     
@@ -230,6 +253,77 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
     #
     #removed currently dfue excel changes
 
+
+    print "THIS SHOULD HANDLE SUBTASKS"
+    print "Subtasks file:{0}".format(subfilename)
+
+    
+    kissa=0
+    
+    
+    i=DATASTARTSROWSUB # brute force row indexing
+    for row in SubCurrentSheet[('B{}:B{}'.format(DATASTARTSROWSUB,SubCurrentSheet.max_row))]:  # go trough all column B (KEY) rows
+        for submycell in row:
+            PARENTKEY=submycell.value
+            logging.debug("SUBROW:{0} Original PARENT ID:{1}".format(i,PARENTKEY))
+            #Issues[KEY]={} # add to dictionary as master key (KEY)
+            
+            #Just hardocode operations, POC is one off
+            #LINKED_ISSUES=(CurrentSheet.cell(row=i, column=K).value) #NOTE THIS APPROACH GOES ALWAYS TO THE FIRST SHEET
+            #logging.debug("Attachment:{0}".format((CurrentSheet.cell(row=i, column=K).value))) # for the same row, show also column K (LINKED_ISSUES) values
+            #Issues[KEY]["LINKED_ISSUES"] = LINKED_ISSUES
+            if PARENTKEY in Issues:
+                print "Subtask has a known parent."
+                #REMARKKEY=SubCurrentSheet['J{0}'.format(i)].value  # column J holds Task-ID NW
+                REMARKKEY=(SubCurrentSheet.cell(row=i, column=J).value)
+                print "REMARKKEY:{0}".format(REMARKKEY)
+                #Issues[KEY]["REMARKS"]={}
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY] = {}
+                
+                
+                # Just hardcode operattions, POC is one off
+                #DECK=SubCurrentSheet['AA{0}'.format(i)].value  # column AA holds DECK
+                DECK=(SubCurrentSheet.cell(row=i, column=AA).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DECK"] = DECK
+            
+            else:
+                    print "ERROR: Unknown parent found"
+            print "----------------------------------"
+    
+    if (kissa==1):        
+        i=DATASTARTSROW # brute force row indexing
+        for row in SubSheet1[('B{}:B{}'.format(DATASTARTSROW,SubSheet1.max_row))]:  # go trough all column B (KEY which is BGR number) rows
+            for mycell in row:
+                KEY=mycell.value
+                logging.debug("ROW:{0} Original ID:{1}".format(i,KEY))
+                if KEY in Issues: 
+              
+                    print "Subtask has a known parent."
+                    #BGR=(SubSheet1.cell(row=i, column=J).value) # This approach takes always values from the first sheet of excel 
+                    REMARKKEY=SubSheet1['J{0}'.format(i)].value  # column J holds BGR numbers
+                    #Issues[KEY]["REMARKS"]={}
+                    Issues[KEY]["REMARKS"][REMARKKEY] = {}
+                
+                
+                    # Just hardcode operattions, POC is one off
+                    DECK=SubSheet1['S{0}'.format(i)].value  # column S holds BGR numbers
+                    Issues[KEY]["REMARKS"][REMARKKEY]["DECK"] = DECK
+                    #logging.debug("i:{0} DECK:{1} REMARKKEY:{2}".format(i,DECK,REMARKKEY))
+                    BLOCK=SubSheet1['R{0}'.format(i)].value  # column R holds BLOCK info
+                    Issues[KEY]["REMARKS"][REMARKKEY]["BLOCK"] = BLOCK
+                
+                    NUMBEROF=SubSheet1['K{0}'.format(i)].value  # column K holds number of remarks
+                    Issues[KEY]["REMARKS"][REMARKKEY]["NUMBEROF"] = NUMBEROF
+                
+                else:
+                    print "ERROR: Unknown parent found"
+                    print "----------------------------------"
+                    i=i+1
+
+    ##########################################################################################################################
+    
+    
+    
     Authenticate(JIRASERVICE,PSWD,USER)
     jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
 
@@ -279,8 +373,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
         INSPECTED=CREATED # just reusing value
 
         
-   
-        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE)
+        print "--> SKIPPED ISSUE CREATION"
+        IssueID="SHIP-1826" #temp ID
+       # IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE)
         print "Issue:{0}".format(IssueID)
         #print "IssueKey:{0}".format(IssueID.key)
         
@@ -306,13 +401,13 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER):
         for subkey , subvalue in Remarks.iteritems():
             #print subkey, subvalue
             print "    Remark key:{0}".format(subkey)
-            print "    A) DECK:{0}".format(Remarks[subkey]["DECK"])
-            print "    B) BLOCK:{0}".format(Remarks[subkey]["BLOCK"])
-            print "    C) NUMBEROF:{0}".format(Remarks[subkey]["NUMBEROF"])
-            JIRASUMMARY="Subtask for BGR:{0}".format(subkey)
-            JIRADESCRIPTION="BLOCK:{0}    DECK:{1}".format(Remarks[subkey]["BLOCK"],Remarks[subkey]["DECK"])
-            SubIssueID=CreateSubTask(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,PARENT)
-            print "Subtask:{0}".format(SubIssueID)
+           # print "    A) DECK:{0}".format(Remarks[subkey]["DECK"])
+           # print "    B) BLOCK:{0}".format(Remarks[subkey]["BLOCK"])
+           # print "    C) NUMBEROF:{0}".format(Remarks[subkey]["NUMBEROF"])
+            #JIRASUMMARY="Subtask for BGR:{0}".format(subkey)
+            #JIRADESCRIPTION="BLOCK:{0}    DECK:{1}".format(Remarks[subkey]["BLOCK"],Remarks[subkey]["DECK"])
+            #SubIssueID=CreateSubTask(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,PARENT)
+            #print "Subtask:{0}".format(SubIssueID)
             
         print "*************************************************************************"
         
