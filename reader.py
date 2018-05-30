@@ -273,7 +273,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             #logging.debug("Attachment:{0}".format((CurrentSheet.cell(row=i, column=K).value))) # for the same row, show also column K (LINKED_ISSUES) values
             #Issues[KEY]["LINKED_ISSUES"] = LINKED_ISSUES
             if PARENTKEY in Issues:
-                print "Subtask has a known parent."
+                print "Subtask has a known parent {0}".format(PARENTKEY)
                 #REMARKKEY=SubCurrentSheet['J{0}'.format(i)].value  # column J holds Task-ID NW
                 REMARKKEY=(SubCurrentSheet.cell(row=i, column=J).value)
                 print "REMARKKEY:{0}".format(REMARKKEY)
@@ -289,6 +289,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             else:
                     print "ERROR: Unknown parent found"
             print "----------------------------------"
+            i=i+1
     
     if (kissa==1):        
         i=DATASTARTSROW # brute force row indexing
