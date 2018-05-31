@@ -131,7 +131,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
 
 
     ########################################
-    #CONFIGURATIONS AND EXCEL COLUMN MAPPINGS
+    #CONFIGURATIONS AND EXCEL COLUMN MAPPINGS, both main and subtask excel
     DATASTARTSROW=5 # data section starting line MAIN TASKS EXCEL
     DATASTARTSROWSUB=5 # data section starting line SUB TASKS EXCEL
     C=3 #SUMMARY
@@ -141,10 +141,12 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
     H=8 #Creator
     I=9 #Inspection date --> Original Created date in Jira Changed as Inspection Date
     J=10 # Subtask TASK-ID
-    #K=11 #LINKED_ISSUES 
+    K=11 #system number, subtasks excel 
     M=13 #Shipnumber
+    N=14 #system number
     P=16 #PerformerNW
-    #Q=17 #ResponsibleNW
+    Q=17 #Performer, subtask excel
+    R=18 #Responsible ,subtask excel
     #U=20 #Responsible Phone Number --> Not taken, field just exists in Jira
     S=19 #DepartmentNW
     V=22 #Deck
@@ -203,7 +205,13 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             Issues[KEY]["CREATOR"] = CREATOR
             
             CREATED=(CurrentSheet.cell(row=i, column=I).value) #Inspection date
-            Issues[KEY]["CREATED"] = CREATED
+            # ISO 8601 conversion to Exceli time
+            time2=CREATED.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
+            print "CREATED ISOFORMAT TIME2:{0}".format(time2)
+            CREATED=time2
+            INSPECTED=CREATED # just reusing value
+            Issues[KEY]["INSPECTED"] = INSPECTED
+            
             
             SHIP=(CurrentSheet.cell(row=i, column=M).value)
             Issues[KEY]["SHIP"] = SHIP
@@ -258,9 +266,6 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
     print "Subtasks file:{0}".format(subfilename)
 
     
-    kissa=0
-    
-    
     i=DATASTARTSROWSUB # brute force row indexing
     for row in SubCurrentSheet[('B{}:B{}'.format(DATASTARTSROWSUB,SubCurrentSheet.max_row))]:  # go trough all column B (KEY) rows
         for submycell in row:
@@ -283,43 +288,46 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
                 
                 # Just hardcode operattions, POC is one off
                 #DECK=SubCurrentSheet['AA{0}'.format(i)].value  # column AA holds DECK
-                DECK=(SubCurrentSheet.cell(row=i, column=AA).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DECK"] = DECK
+                SUBDECK=(SubCurrentSheet.cell(row=i, column=AA).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DECK"] = SUBDECK
+                
+                SUBBLOCK=(SubCurrentSheet.cell(row=i, column=X).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["BLOCK"] = SUBBLOCK
+                
+                SUBPERFORMER=(SubCurrentSheet.cell(row=i, column=Q).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["PERFORMER"] = SUBPERFORMER
+                
+                SUBRESPONSIBLE=(SubCurrentSheet.cell(row=i, column=R).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["RESPONSIBLE"] = SUBRESPONSIBLE
+                
+                SUBDEPARTMENT=(SubCurrentSheet.cell(row=i, column=W).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DEPARTMENT"] = SUBDEPARTMENT
+                
+                SUBISSUETYPE=(SubCurrentSheet.cell(row=i, column=D).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["ISSUETYPE"] = SUBISSUETYPE
+                
+                SUBSYSTEMNUMBER=(SubCurrentSheet.cell(row=i, column=N).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SYSTEMNUMBER"] = SUBSYSTEMNUMBER
+                
+                SUBSUMMARY=(SubCurrentSheet.cell(row=i, column=C).value)
+                if not SUBSUMMARY:
+                    SUBSUMMARY="Summary for this subtask has not been defined"
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUMMARY"] = SUBSUMMARY
+                
+                SUBCREATED=(SubCurrentSheet.cell(row=i, column=I).value) #Inspection date
+                # ISO 8601 conversion to Exceli time
+                subtime2=SUBCREATED.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
+                print "CREATED SUBTASK ISOFORMAT TIME2:{0}".format(subtime2)
+                SUBCREATED=subtime2
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUBCREATED"] = SUBCREATED
+                
             
             else:
                     print "ERROR: Unknown parent found"
             print "----------------------------------"
             i=i+1
     
-    if (kissa==1):        
-        i=DATASTARTSROW # brute force row indexing
-        for row in SubSheet1[('B{}:B{}'.format(DATASTARTSROW,SubSheet1.max_row))]:  # go trough all column B (KEY which is BGR number) rows
-            for mycell in row:
-                KEY=mycell.value
-                logging.debug("ROW:{0} Original ID:{1}".format(i,KEY))
-                if KEY in Issues: 
-              
-                    print "Subtask has a known parent."
-                    #BGR=(SubSheet1.cell(row=i, column=J).value) # This approach takes always values from the first sheet of excel 
-                    REMARKKEY=SubSheet1['J{0}'.format(i)].value  # column J holds BGR numbers
-                    #Issues[KEY]["REMARKS"]={}
-                    Issues[KEY]["REMARKS"][REMARKKEY] = {}
-                
-                
-                    # Just hardcode operattions, POC is one off
-                    DECK=SubSheet1['S{0}'.format(i)].value  # column S holds BGR numbers
-                    Issues[KEY]["REMARKS"][REMARKKEY]["DECK"] = DECK
-                    #logging.debug("i:{0} DECK:{1} REMARKKEY:{2}".format(i,DECK,REMARKKEY))
-                    BLOCK=SubSheet1['R{0}'.format(i)].value  # column R holds BLOCK info
-                    Issues[KEY]["REMARKS"][REMARKKEY]["BLOCK"] = BLOCK
-                
-                    NUMBEROF=SubSheet1['K{0}'.format(i)].value  # column K holds number of remarks
-                    Issues[KEY]["REMARKS"][REMARKKEY]["NUMBEROF"] = NUMBEROF
-                
-                else:
-                    print "ERROR: Unknown parent found"
-                    print "----------------------------------"
-                    i=i+1
+
 
     ##########################################################################################################################
     
@@ -338,7 +346,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
         print "5)ISSUE_TYPE:{0}".format((Issues[key]["ISSUE_TYPE"]).encode('utf-8'))    
         print "6)STATUS:{0}".format(Issues[key]["STATUS"])  
         print "7)CREATOR:{0}".format(Issues[key]["CREATOR"])  
-        print "8)CREATED:{0}".format(Issues[key]["CREATED"]) 
+        print "8)INSPECTED:{0}".format(Issues[key]["INSPECTED"]) 
         print "9)SHIP:{0}".format(Issues[key]["SHIP"]) 
         print "10)PERFORMER:{0}".format(Issues[key]["PERFORMER"]) #.encode('utf8'))    
         print "11)RESPONSIBLE:{0}".format(Issues[key]["RESPONSIBLE"]) #.encode('utf8'))         
@@ -356,7 +364,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
         KEY=key
         #REPORTER=Issues[key]["REPORTER"]
         CREATOR=Issues[key]["CREATOR"]
-        CREATED=Issues[key]["CREATED"] # 30.1.2018  9:32:15 fromat from excel
+        INSPECTED=Issues[key]["INSPECTED"] # 30.1.2018  9:32:15 fromat from excel
         SHIP=Issues[key]["SHIP"]
         RESPONSIBLE=Issues[key]["RESPONSIBLE"]
         PERFORMER=Issues[key]["PERFORMER"]
@@ -367,11 +375,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
         ISSUETYPE=Issues[key]["ISSUE_TYPE"]
 
         
-        # ISO 8601 conversion to Exceli time
-        time2=CREATED.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
-        print "CREATED ISOFORMAT TIME2:{0}".format(time2)
-        CREATED=time2
-        INSPECTED=CREATED # just reusing value
+    
 
         
         print "--> SKIPPED ISSUE CREATION"
