@@ -321,6 +321,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
                 SUBCREATED=subtime2
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUBCREATED"] = SUBCREATED
                 
+                JIRASUBDESCRIPTION="Remark for Inspection Report"
+                SUBTASKID=REMARKKEY
             
             else:
                     print "ERROR: Unknown parent found"
@@ -378,9 +380,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
     
 
         
-        print "--> SKIPPED ISSUE CREATION"
-        IssueID="SHIP-1826" #temp ID
-       # IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE)
+        #print "--> SKIPPED ISSUE CREATION"
+        #IssueID="SHIP-1826" #temp ID
+        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE)
         print "Issue:{0}".format(IssueID)
         #print "IssueKey:{0}".format(IssueID.key)
         
@@ -404,15 +406,32 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
         PARENT=IssueID
         #create subtask(s) under one parent
         for subkey , subvalue in Remarks.iteritems():
-            #print subkey, subvalue
-            print "    Remark key:{0}".format(subkey)
-           # print "    A) DECK:{0}".format(Remarks[subkey]["DECK"])
-           # print "    B) BLOCK:{0}".format(Remarks[subkey]["BLOCK"])
-           # print "    C) NUMBEROF:{0}".format(Remarks[subkey]["NUMBEROF"])
+            
+            
+            SUBSUMMARY=Remarks[subkey]["SUMMARY"]
+            SUBSUMMARY=SUBSUMMARY.replace("\n", "")
+            SUBSUMMARY=SUBSUMMARY[:254] ## summary max length is 255
+            SUBISSUETYPE=(Remarks[subkey]["ISSUETYPE"]) #.encode('utf-8'))
+            SUBRESPONSIBLE=(Remarks[subkey]["RESPONSIBLE"])#.encode('utf-8'))
+            SUBPERFORMER=Remarks[subkey]["PERFORMER"]
+            SUBTASKID=subkey
+            
+            
+            print "SUBTASK:{0} ----> {1}".format(subkey, subvalue)
+            print "Remark key:{0}".format(SUBTASKID)
+            print "    A) TODO DECK:{0}".format(Remarks[subkey]["DECK"]).encode('utf-8')
+            print "    B) RODO BLOCK:{0}".format(Remarks[subkey]["BLOCK"]).encode('utf-8')
+            print "    C) SUBSUMMARY:{0}".format((SUBSUMMARY).encode('utf-8'))
+            print "    C) SUBISSUETYPE:{0}".format((ISSUETYPE).encode('utf-8'))
+            print "    C) SUBRESPONSIBLE:{0}".format((SUBRESPONSIBLE).encode('utf-8'))
+            print "    C) SUBPERFORMER:{0}".format((SUBPERFORMER).encode('utf-8'))
+            print "    C) SUBTASKID:{0}".format(SUBTASKID)
             #JIRASUMMARY="Subtask for BGR:{0}".format(subkey)
             #JIRADESCRIPTION="BLOCK:{0}    DECK:{1}".format(Remarks[subkey]["BLOCK"],Remarks[subkey]["DECK"])
-            #SubIssueID=CreateSubTask(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,PARENT)
-            #print "Subtask:{0}".format(SubIssueID)
+            
+            # TODO Lisä Block ja deck
+            SubIssueID=CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBISSUETYPE,SUBRESPONSIBLE,SUBPERFORMER,SUBTASKID)
+            print "Created subtask:{0}".format(SubIssueID)
             
         print "*************************************************************************"
         

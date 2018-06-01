@@ -164,6 +164,7 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED
     'customfield_12328': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
     'customfield_12330': str(INSPECTED), # Original inspectiond date
     'customfield_12331': ISSUETYPE.encode('utf-8'), # Original inspectiond date
+    
     }
 
     try:
@@ -177,16 +178,20 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED
 ############################################################################################'
 # Quick way to create subtask
 #
-def CreateSubTask(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,PARENT):
+def CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPONSIBLE,SUBISSUETYPE,SUBPERFORMER,SUBTASKID):
     jiraobj=jira
     project=JIRAPROJECT
     print "Creating subtask for JIRA project: {0} Parent:{1}".format(project,PARENT)
     issue_dict = {
     'project': {'key': JIRAPROJECT},
-    'summary': JIRASUMMARY,
-    'description': JIRADESCRIPTION,
+    'summary': SUBSUMMARY,
+    'description': JIRASUBDESCRIPTION,
     'issuetype': {'name': 'Remark1'}, #  is a Sub-task type CHANGE FOR target system
-    'parent' : { 'id' : str(PARENT)},   # PARENT is an object, convert
+    'parent' : { 'id' : str(PARENT)},   # PARENT is an object, convert  SUBISSUETYPE
+    'customfield_12332': str(SUBTASKID), # SubtaskNW
+    'customfield_12323': SUBRESPONSIBLE.encode('utf-8'), # ResponsibleNW in ALM demo
+    'customfield_12331': SUBISSUETYPE.encode('utf-8'), # Original date
+    'customfield_12322': SUBPERFORMER.encode('utf-8'), # PerformerNW in ALM demo
     }
 
 
