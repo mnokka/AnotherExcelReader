@@ -415,22 +415,24 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             SUBRESPONSIBLE=(Remarks[subkey]["RESPONSIBLE"])#.encode('utf-8'))
             SUBPERFORMER=Remarks[subkey]["PERFORMER"]
             SUBTASKID=subkey
-            
+            SUBCREATED = Remarks[subkey]["SUBCREATED"]
+          
             
             print "SUBTASK:{0} ----> {1}".format(subkey, subvalue)
             print "Remark key:{0}".format(SUBTASKID)
             print "    A) TODO DECK:{0}".format(Remarks[subkey]["DECK"]).encode('utf-8')
             print "    B) RODO BLOCK:{0}".format(Remarks[subkey]["BLOCK"]).encode('utf-8')
             print "    C) SUBSUMMARY:{0}".format((SUBSUMMARY).encode('utf-8'))
-            print "    C) SUBISSUETYPE:{0}".format((ISSUETYPE).encode('utf-8'))
-            print "    C) SUBRESPONSIBLE:{0}".format((SUBRESPONSIBLE).encode('utf-8'))
-            print "    C) SUBPERFORMER:{0}".format((SUBPERFORMER).encode('utf-8'))
-            print "    C) SUBTASKID:{0}".format(SUBTASKID)
+            print "    D) SUBISSUETYPE:{0}".format((ISSUETYPE).encode('utf-8'))
+            print "    E) SUBRESPONSIBLE:{0}".format((SUBRESPONSIBLE).encode('utf-8'))
+            print "    F) SUBPERFORMER:{0}".format((SUBPERFORMER).encode('utf-8'))
+            print "    G) SUBTASKID:{0}".format(SUBTASKID)
+            print "   H) SUBCREATED:{0}".format(SUBCREATED)
             #JIRASUMMARY="Subtask for BGR:{0}".format(subkey)
             #JIRADESCRIPTION="BLOCK:{0}    DECK:{1}".format(Remarks[subkey]["BLOCK"],Remarks[subkey]["DECK"])
             
             # TODO Lisä Block ja deck
-            SubIssueID=CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPONSIBLE,SUBISSUETYPE,SUBPERFORMER,SUBTASKID)
+            SubIssueID=CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPONSIBLE,SUBISSUETYPE,SUBPERFORMER,SUBTASKID,SUBCREATED)
         
             print "Created subtask:{0}".format(SubIssueID)
             

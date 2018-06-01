@@ -178,7 +178,7 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED
 ############################################################################################'
 # Quick way to create subtask
 #
-def CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPONSIBLE,SUBISSUETYPE,SUBPERFORMER,SUBTASKID):
+def CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPONSIBLE,SUBISSUETYPE,SUBPERFORMER,SUBTASKID,SUBCREATED):
     jiraobj=jira
     project=JIRAPROJECT
     print "Creating subtask for JIRA project: {0} Parent:{1}".format(project,PARENT)
@@ -192,6 +192,7 @@ def CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPO
     'customfield_12323': SUBRESPONSIBLE.encode('utf-8'), # ResponsibleNW in ALM demo
     'customfield_12331': SUBISSUETYPE.encode('utf-8'), # Original date
     'customfield_12322': SUBPERFORMER.encode('utf-8'), # PerformerNW in ALM demo
+    'customfield_12320': SUBCREATED.encode('utf-8'), # Original Created Date in ALM demo
     }
 
 
