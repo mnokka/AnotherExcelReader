@@ -130,7 +130,7 @@ def DoJIRAStuff(user,PASSWORD,JIRASERVICE):
  return jira   
     
 ####################################################################################
-def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTER,CREATED,SHIP,PERFOMER,RESPONSIBLE,BLOCK,DECK,DEPARTMENT):
+def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFOMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE,SYSTEMNUMBER):
     jiraobj=jira
     project=JIRAPROJECT
     
@@ -148,12 +148,15 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTE
     
     print "Creating issue for JIRA project: {0}".format(project)
     
+
+    
     issue_dict = {
     'project': {'key': JIRAPROJECT},
     'summary': JIRASUMMARY,
     'description': JIRADESCRIPTION,
     'issuetype': {'name': TASKTYPE},
-    #'customfield_12317': str(KEY),  # Key in ALM demo
+    # ALMDEMO
+    #'customfield_12317': str(KEY),  # Key in ALM demo 
     #'customfield_12318': str(CREATOR),  # Reporter in ALM demo
     #'customfield_12319': str(REPORTER),  # Creator in ALM demo
     #'customfield_12320': str(CREATED),  # Original Created Time in ALM demo
@@ -161,8 +164,11 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTE
     #'customfield_12322': str(PERFOMER), # PerformerNW in ALM demo
     #'customfield_12323': str(RESPONSIBLE), # ResponsibleNW in ALM demo
     #'customfield_12324': str(BLOCK), # BlockNW in ALM demo
-    #'customfield_12326': str(DECK), # DeckNW in ALM demo
+    #'customfield_12326': DECK.encode('utf-8'), # DeckNW in ALM demo
     #'customfield_12328': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
+    #'customfield_12330': str(INSPECTED), # Original inspectiond date
+    #'customfield_12331': ISSUETYPE.encode('utf-8'), # Original inspectiond date
+    #'customfield_12334': SYSTEMNUMBER.encode('utf-8'), # System Number NW
     #PROD:
     'customfield_12900': str(KEY),  # Key in ALM demo
     'customfield_12902': str(CREATOR),  # Reporter in ALM demo
@@ -174,8 +180,7 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTE
     'customfield_12907': str(BLOCK), # BlockNW in ALM demo
     'customfield_12908': str(DECK), # DeckNW in ALM demo
     'customfield_12909': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
-    
-    
+
     }
 
     try:
@@ -189,7 +194,7 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,REPORTE
 ############################################################################################'
 # Quick way to create subtask
 #
-def CreateSubTask(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,PARENT):
+def CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPONSIBLE,SUBISSUETYPE,SUBPERFORMER,SUBTASKID,SUBCREATED):
     jiraobj=jira
     project=JIRAPROJECT
     #SUBTASKTYPE="Remark1"
@@ -197,11 +202,19 @@ def CreateSubTask(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,PARENT):
     print "Creating subtask for JIRA project: {0} Parent:{1}".format(project,PARENT)
     issue_dict = {
     'project': {'key': JIRAPROJECT},
-    'summary': JIRASUMMARY,
-    'description': JIRADESCRIPTION,
-    #'issuetype': {'name': 'Remark1'}, #  is a Sub-task type CHANGE FOR target system
-    'issuetype': {'name': SUBTASKTYPE}, 
-    'parent' : { 'id' : str(PARENT)},   # PARENT is an object, convert
+
+    'summary': SUBSUMMARY,
+    'description': JIRASUBDESCRIPTION,
+    'issuetype': {'name': 'Remark1'}, #  is a Sub-task type CHANGE FOR target system
+    'parent' : { 'id' : str(PARENT)},   # PARENT is an object, convert  SUBISSUETYPE
+    #ALMDEMO:
+    #'customfield_12332': str(SUBTASKID), # SubtaskNW
+    #'customfield_12323': SUBRESPONSIBLE.encode('utf-8'), # ResponsibleNW in ALM demo
+    #'customfield_12331': SUBISSUETYPE.encode('utf-8'), # Original date
+    #'customfield_12322': SUBPERFORMER.encode('utf-8'), # PerformerNW in ALM demo
+    #'customfield_12320': SUBCREATED.encode('utf-8'), # Original Created Date in ALM demo
+    #PROD:
+
     }
 
 
