@@ -430,7 +430,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             #JIRADESCRIPTION="BLOCK:{0}    DECK:{1}".format(Remarks[subkey]["BLOCK"],Remarks[subkey]["DECK"])
             
             # TODO Lisä Block ja deck
-            SubIssueID=CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBISSUETYPE,SUBRESPONSIBLE,SUBPERFORMER,SUBTASKID)
+            SubIssueID=CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPONSIBLE,SUBISSUETYPE,SUBPERFORMER,SUBTASKID)
+        
             print "Created subtask:{0}".format(SubIssueID)
             
         print "*************************************************************************"
