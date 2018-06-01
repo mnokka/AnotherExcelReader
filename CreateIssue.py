@@ -130,7 +130,7 @@ def DoJIRAStuff(user,PASSWORD,JIRASERVICE):
  return jira   
     
 ####################################################################################
-def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFOMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE):
+def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFOMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE,SYSTEMNUMBER):
     jiraobj=jira
     project=JIRAPROJECT
     
@@ -164,7 +164,7 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED
     'customfield_12328': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
     'customfield_12330': str(INSPECTED), # Original inspectiond date
     'customfield_12331': ISSUETYPE.encode('utf-8'), # Original inspectiond date
-    
+    'customfield_12334': SYSTEMNUMBER.encode('utf-8'), # System Number NW
     }
 
     try:

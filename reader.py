@@ -235,6 +235,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             FIREZONE=(CurrentSheet.cell(row=i, column=X).value)
             Issues[KEY]["FIREZONE"] = FIREZONE
             
+                
+            SYSTEMNUMBER=(CurrentSheet.cell(row=i, column=N).value)
+            Issues[KEY]["SYSTEMNUMBER"] = SYSTEMNUMBER
             
             
             
@@ -358,6 +361,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
         #print "15)CRONO:{0}".format(Issues[key]["CRONO"])          
         print "16)DECK:{0}".format(Issues[key]["DECK"])      
         print "16)FIREZONE:{0}".format(Issues[key]["FIREZONE"])
+        print "17)SYSTEMNUMBER:{0}".format(Issues[key]["SYSTEMNUMBER"])
    
         JIRADESCRIPTION="Inspection Report"
         JIRASUMMARY=(Issues[key]["SUMMARY"]).encode('utf-8')          
@@ -375,14 +379,14 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
         DECK=Issues[key]["DECK"]
         DECK=DECK.encode('utf-8') 
         ISSUETYPE=Issues[key]["ISSUE_TYPE"]
-
+        SYSTEMNUMBER=Issues[key]["SYSTEMNUMBER"]
         
     
 
         
         #print "--> SKIPPED ISSUE CREATION"
         #IssueID="SHIP-1826" #temp ID
-        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE)
+        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE,SYSTEMNUMBER)
         print "Issue:{0}".format(IssueID)
         #print "IssueKey:{0}".format(IssueID.key)
         
