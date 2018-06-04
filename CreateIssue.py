@@ -209,7 +209,7 @@ def CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPO
 
     'summary': SUBSUMMARY,
     'description': JIRASUBDESCRIPTION,
-    'issuetype': {'name': 'Remark1'}, #  is a Sub-task type CHANGE FOR target system
+    'issuetype': {'name': SUBTASKTYPE}, #  is a Sub-task type CHANGE FOR target system
     'parent' : { 'id' : str(PARENT)},   # PARENT is an object, convert  SUBISSUETYPE
     #ALMDEMO:
     #'customfield_12332': str(SUBTASKID), # SubtaskNW
