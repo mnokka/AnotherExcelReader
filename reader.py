@@ -377,7 +377,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
         BLOCK=Issues[key]["BLOCK"]
         DEPARTMENT=Issues[key]["DEPARTMENT"]
         DECK=Issues[key]["DECK"]
-        DECK=DECK.encode('utf-8') 
+        #DECK=DECK.encode('utf-8') # from June 2018 first real import (change in the excel format) 
+        DECK=DECK 
         ISSUETYPE=Issues[key]["ISSUE_TYPE"]
         SYSTEMNUMBER=Issues[key]["SYSTEMNUMBER"]
         
