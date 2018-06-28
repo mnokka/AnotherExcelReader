@@ -164,7 +164,8 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED
     'customfield_12322': str(PERFOMER), # PerformerNW in ALM demo
     'customfield_12323': str(RESPONSIBLE), # ResponsibleNW in ALM demo
     'customfield_12324': str(BLOCK), # BlockNW in ALM demo
-    'customfield_12326': DECK.encode('utf-8'), # DeckNW in ALM demo
+    #'customfield_12326': DECK.encode('utf-8'), # DeckNW in ALM demo
+    'customfield_12326': str(DECK), # DeckNW in ALM demo    from June 2018 first real import (change in the excel format) 
     'customfield_12328': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
     'customfield_12330': str(INSPECTED), # Original inspectiond date
     'customfield_12331': ISSUETYPE.encode('utf-8'), # Original inspectiond date
