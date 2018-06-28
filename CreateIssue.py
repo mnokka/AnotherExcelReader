@@ -156,9 +156,10 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED
     'description': JIRADESCRIPTION,
     'issuetype': {'name': TASKTYPE},
     # ALMDEMO
-    'customfield_12317': str(KEY),  # Key in ALM demo 
-    'customfield_12318': str(CREATOR),  # Reporter in ALM demo
+    #'customfield_12317': str(KEY),  # Key in ALM demo 
+    #'customfield_12318': str(CREATOR),  # Reporter in ALM demo
     ##'customfield_12319': str(REPORTER),  # Creator in ALM demo
+
     'customfield_12320': str(CREATED),  # Original Created Time in ALM demo
     'customfield_12321': str(SHIP), # Ship Number in ALM demo
     'customfield_12322': str(PERFOMER), # PerformerNW in ALM demo
@@ -170,18 +171,22 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED
     'customfield_12330': str(INSPECTED), # Original inspectiond date
     'customfield_12331': ISSUETYPE.encode('utf-8'), # Original inspectiond date
     'customfield_12334': SYSTEMNUMBER.encode('utf-8'), # System Number NW
-    #PROD:
-    #'customfield_12900': str(KEY),  # Key in ALM demo
-    #'customfield_12902': str(CREATOR),  # Reporter in ALM demo
-    ##'customfield_12901': str(REPORTER),  # Creator in ALM demo
-    #'customfield_12903': str(CREATED),  # Original Created Time in ALM demo
-    #'customfield_12904': str(SHIP), # Ship Number in ALM demo
-    #'customfield_12905': str(PERFOMER), # PerformerNW in ALM demo
-    #'customfield_12906': str(RESPONSIBLE), # ResponsibleNW in ALM demo
-    #'customfield_12907': str(BLOCK), # BlockNW in ALM demo
-    #'customfield_12908': str(DECK), # DeckNW in ALM demo
-    #'customfield_12909': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
 
+    #PROD:
+    'customfield_12900': str(KEY),  # Key in ALM demo
+    'customfield_12902': str(CREATOR),  # Reporter in ALM demo
+    ##'customfield_12901': str(REPORTER),  # Creator in ALM demo
+    'customfield_12903': str(CREATED),  # Original Created Time in ALM demo
+    'customfield_12904': str(SHIP), # Ship Number in ALM demo
+    'customfield_12905': str(PERFOMER), # PerformerNW in ALM demo
+    'customfield_12906': str(RESPONSIBLE), # ResponsibleNW in ALM demo
+    'customfield_12907': str(BLOCK), # BlockNW in ALM demo
+    #'customfield_12908': DECK.encode('utf-8'), # DeckNW in ALM demo from June 2018 first real import (change in the excel format) 
+    'customfield_12908': str(DECK), # DeckNW in ALM demo
+    'customfield_12909': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
+    'customfield_13102': str(INSPECTED), # Original inspectiond date
+    'customfield_13101': ISSUETYPE.encode('utf-8'), # Original inspectiond date
+    'customfield_13103': SYSTEMNUMBER.encode('utf-8'), # System Number NW
 
 
     }
@@ -208,20 +213,20 @@ def CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPO
 
     'summary': SUBSUMMARY,
     'description': JIRASUBDESCRIPTION,
-    'issuetype': {'name': 'Remark1'}, #  is a Sub-task type CHANGE FOR target system
+    'issuetype': {'name': SUBTASKTYPE}, #  is a Sub-task type CHANGE FOR target system
     'parent' : { 'id' : str(PARENT)},   # PARENT is an object, convert  SUBISSUETYPE
     #ALMDEMO:
-    'customfield_12332': str(SUBTASKID), # SubtaskNW
-    'customfield_12323': SUBRESPONSIBLE.encode('utf-8'), # ResponsibleNW in ALM demo
-    'customfield_12331': SUBISSUETYPE.encode('utf-8'), # Original date
-    'customfield_12322': SUBPERFORMER.encode('utf-8'), # PerformerNW in ALM demo
-    'customfield_12320': SUBCREATED.encode('utf-8'), # Original Created Date in ALM demo
+    #'customfield_12332': str(SUBTASKID), # SubtaskNW
+    #'customfield_12323': SUBRESPONSIBLE.encode('utf-8'), # ResponsibleNW in ALM demo
+    #'customfield_12331': SUBISSUETYPE.encode('utf-8'), # Original date
+    #'customfield_12322': SUBPERFORMER.encode('utf-8'), # PerformerNW in ALM demo
+    #'customfield_12320': SUBCREATED.encode('utf-8'), # Original Created Date in ALM demo
     #PROD:
-    #'customfield_13100': str(SUBTASKID), # SubtaskNW
-    #'customfield_12906': SUBRESPONSIBLE.encode('utf-8'), # ResponsibleNW in ALM demo
-    #'customfield_13101': SUBISSUETYPE.encode('utf-8'), # Original date
-    #'customfield_12905': SUBPERFORMER.encode('utf-8'), # PerformerNW in ALM demo
-    #'customfield_12903': SUBCREATED.encode('utf-8'), # Original Created Date in ALM demo
+    'customfield_13100': str(SUBTASKID), # SubtaskNW
+    'customfield_12906': SUBRESPONSIBLE.encode('utf-8'), # ResponsibleNW in ALM demo
+    'customfield_13101': SUBISSUETYPE.encode('utf-8'), # Original date
+    'customfield_12905': SUBPERFORMER.encode('utf-8'), # PerformerNW in ALM demo
+    'customfield_12903': SUBCREATED.encode('utf-8'), # Original Created Date in ALM demo
     }
 
 
