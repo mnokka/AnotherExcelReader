@@ -160,17 +160,17 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED
     #'customfield_12318': str(CREATOR),  # Reporter in ALM demo
     ##'customfield_12319': str(REPORTER),  # Creator in ALM demo
 
-    'customfield_12320': str(CREATED),  # Original Created Time in ALM demo
-    'customfield_12321': str(SHIP), # Ship Number in ALM demo
-    'customfield_12322': str(PERFOMER), # PerformerNW in ALM demo
-    'customfield_12323': str(RESPONSIBLE), # ResponsibleNW in ALM demo
-    'customfield_12324': str(BLOCK), # BlockNW in ALM demo
+    #'customfield_12320': str(CREATED),  # Original Created Time in ALM demo
+    #'customfield_12321': str(SHIP), # Ship Number in ALM demo
+    #'customfield_12322': str(PERFOMER), # PerformerNW in ALM demo
+    #'customfield_12323': str(RESPONSIBLE), # ResponsibleNW in ALM demo
+    #'customfield_12324': str(BLOCK), # BlockNW in ALM demo
     #'customfield_12326': DECK.encode('utf-8'), # DeckNW in ALM demo
-    'customfield_12326': str(DECK), # DeckNW in ALM demo    from June 2018 first real import (change in the excel format) 
-    'customfield_12328': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
-    'customfield_12330': str(INSPECTED), # Original inspectiond date
-    'customfield_12331': ISSUETYPE.encode('utf-8'), # Original inspectiond date
-    'customfield_12334': SYSTEMNUMBER.encode('utf-8'), # System Number NW
+    #'customfield_12326': str(DECK), # DeckNW in ALM demo    from June 2018 first real import (change in the excel format) 
+    #'customfield_12328': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
+    #'customfield_12330': str(INSPECTED), # Original inspectiond date
+    #'customfield_12331': ISSUETYPE.encode('utf-8'), # Original inspectiond date
+    #'customfield_12334': SYSTEMNUMBER.encode('utf-8'), # System Number NW
 
     #PROD:
     'customfield_12900': str(KEY),  # Key in ALM demo
