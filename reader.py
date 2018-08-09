@@ -20,6 +20,8 @@ from CreateIssue import Authenticate  # no need to use as external command
 from CreateIssue import DoJIRAStuff, CreateSubTask
 from CreateIssue import CreateIssue 
 import glob
+import re
+import os
 
  
 __version__ = "0.2.1394"
@@ -57,6 +59,7 @@ def main(argv):
     parser.add_argument('-u','--user', help='<JIRA user>')
     parser.add_argument('-s','--service', help='<JIRA service>')
     parser.add_argument('-p','--project', help='<JIRA project>')
+    parser.add_argument('-n','--rename', help='<rename files>') #adhoc operation activation
    
         
     args = parser.parse_args()
@@ -73,6 +76,7 @@ def main(argv):
     JIRAPROJECT = args.project or ''
     PSWD= args.password or ''
     USER= args.user or ''
+    RENAME= args.rename or ''
     
     # quick old-school way to check needed parameters
     if (filepath=='' or  JIRASERVICE=='' or  JIRAPROJECT==''  or PSWD=='' or USER=='' ):
@@ -81,7 +85,7 @@ def main(argv):
         
 
 
-    Parse(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER)
+    Parse(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME)
 
 
 ############################################################################################################################################
@@ -90,7 +94,7 @@ def main(argv):
 
 #NOTE: Uses hardcoded sheet/column value
 
-def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER):
+def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME):
     logging.debug ("Filepath: %s   " %(filepath))
     #files=filepath+"/"+filename
     #logging.debug ("File:{0}".format(files))
@@ -132,14 +136,35 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER):
     attachments=glob.glob("{0}/*/*".format(filepath))
     if (len(attachments) > 0): # if any attachment with key embedded to name found
         
-        #print "Found these:{0}".format(attachments)
-        i=1
-        for item in attachments: # add them all
+        # RENAME ATTACHMENT FILES USING DIRECTORY ID NUMBER
+        # FILE Attachment 1016:..\..\MIKAN_TYO\ASIAKKAAT\Meyer\tsp\04_Attachment Remarks\394_3429854\IMG_0330.JPG RENAMING -->
+        # Attachment 1016:..\..\MIKAN_TYO\ASIAKKAAT\Meyer\tsp\04_Attachment Remarks\394_3429854\3429854_IMG_0330.JPG
+        if (RENAME):
+            i=1
+            for item in attachments: # add them all
                 #jira.add_attachment(issue=IssueID, attachment=attachments[0])
+                print "*****************************************"
                 print "Attachment {0}:{1}".format(i,item)
+                regex = r"(\\)(\d\d\d)(_)(\d+)(\\)(.*)"
+                regex2=r"(.*?)(\\)(\d\d\d)(_)(\d+)(\\)(.*)"
+                #test_str = "\\394_3428553\\"
+                match = re.search(regex, item)
+                match2 = re.search(regex2, item)
+                hit=match.group(4)
+                origname=match.group(6)
+                path=match2.group(1)+match2.group(2)+match2.group(3)+match2.group(4)+match2.group(5)
+                print "Attachment remark ID:{0}".format(hit)
+                print "Original name:{0}".format(origname)
+                newname=hit+"_"+origname
+                print "New name:{0}".format(newname)
+                print "Path: {0}".format(path)
+                newfile=path+"\\"+newname
+                print "GOING TO DO RENAMING:{0} ---->  {1}".format(item,newfile)
+                os.rename(item, newfile)
+                print "Done!!!"
                 i=i+1
-    else:
-            print "NO attachments  found for key:{0}".format(IssueID)
+        else:
+            print "--> Renaming bypassed"
         
         
         
