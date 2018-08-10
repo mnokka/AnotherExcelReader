@@ -456,6 +456,8 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                             print "HIHIT ******"
                             print key3, value3
                             print key,value
+                            print "ORIGINAL KEY:{0}  ORIGINAL REMARK KEY:{1}".format(key,key3)
+                            print "SUMMARY:{0}".format(value3["SUMMARY"])
                 
          #   print "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
     
