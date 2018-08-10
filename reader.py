@@ -190,7 +190,7 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
     jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
 
     
-        
+    #Deactivated renaming command     
     attachments=glob.glob("{0}/*/*".format(filepath))
     if (len(attachments) > 0): # if any attachment with key embedded to name found
         
@@ -235,7 +235,7 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
         print "--> SUBTASK EXCEL: {0}".format(subfilename)
         
         
-     ##############################################################################################
+    ### MAIN EXCEL ###########################################################################################
     #Go through main excel sheet for main issue keys (and contents findings)
     # Create dictionary structure (remarks)
     # NOTE: Uses hardcoded sheet/column values
@@ -329,7 +329,7 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
     #    print key, value
    
         
-    ############################################################################################################################
+    #######REMARK EXCEL #####################################################################################################################
     # Check any remarks (subtasks) for main issue
     # NOTE: Uses hardcoded sheet/column values
     #
@@ -401,70 +401,68 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
            
        
          
-    # Now orignal directory has been re-created
-    # used direcotryn and file name included remark ID to find main issue key (in old ticketing system)
+    # Now orignal dictionary has been re-created (used to crate Jira issues)
+    # Use file name embedded remark ID to find orignal main issue key (in old ticketing system) and remark summmay text
+    # these info needed, when deciding to which Jira remark (subtask) to attach curren attachment file
     
-        
-    #print Issues
-        #for issue in Issues:
-        #    print "ISSUE: {0}".format(issue)
-    #for key, value in Issues.items() :
-            #print key,value
-            #if (Issues[key]["REMARKS"][REMARKKEY]["REMARKKEY"] == "3135983"):
-            #if ("3135983" in Issues):
-            #   print key,value
-            
-            #for subdirec in value:
-            # print "v:{0}".format(subdirec)   
-            # if (subdirec=="REMARKS"):
-            #     print "REMARKS"
              
-    #find="3135983"
-    find=3128668
-    #find="REMARKKEY"
+    find=3135983
+    #find=3128668
+
     
-    #for i in Issues:   # .keys():
+    
+    attachments=glob.glob("{0}/*/*".format(filepath)) # get all attachments
+    if (len(attachments) > 0): # if any attachment with key embedded to name found
         
-      ## print "key:{1} subkey:{0}".format(Issues[i].keys(),i)
-       
-       #for j in Issues[i].keys():
-       #    print "j:{0}".format(j)
-       
-       ##if find in Issues[i].keys():
-            
-            #print "KEY:"
-            #print "HIT:{i}".format(Issues[i])
-           # for j in  Issues[i]:
-           #     if find in j:
-           #         print "HIT"   
-                            
-            #print "--------------------------------------------------------"
-    
-    
-    for key, value in Issues.iteritems() :
-        #print key, value
-        #print "************************************"
-        for key2, value2 in value.iteritems():
-            #print key2, value2
-            if key2=="REMARKS":
-                #print key2,value2
+        # RENAME ATTACHMENT FILES USING DIRECTORY ID NUMBER
+        # FILE Attachment 1016:..\..\MIKAN_TYO\ASIAKKAAT\Meyer\tsp\04_Attachment Remarks\394_3429854\IMG_0330.JPG RENAMING -->
+        # Attachment 1016:..\..\MIKAN_TYO\ASIAKKAAT\Meyer\tsp\04_Attachment Remarks\394_3429854\3429854_IMG_0330.JPG
+
+            i=1
+            for item in attachments: # check them all
+                #jira.add_attachment(issue=IssueID, attachment=attachments[0])
+                print "*****************************************"
+                print "Attachment {0}:{1}".format(i,item)
+                regex = r"(\\)(\d\d\d)(_)(\d+)(\\)(.*)"
+                regex2=r"(.*?)(\\)(\d\d\d)(_)(\d+)(\\)(.*)"
+                #test_str = "\\394_3428553\\"
+                match = re.search(regex, item)
+                match2 = re.search(regex2, item)
+                hit=match.group(4)
+                origname=match.group(6)
+                path=match2.group(1)+match2.group(2)+match2.group(3)+match2.group(4)+match2.group(5)
+                print "Attachment remark ID:{0}".format(hit)
                 
-                for key3, value3 in value2.iteritems():
-                    #print key3,value3
+                
+                find=int(hit)
+                 # uses "find" to define which remark original ID is being searched
+                for key, value in Issues.iteritems() :
+                    #print key, value
+                    #print "************************************"
+                    for key2, value2 in value.iteritems():
+                        #print key2, value2
+                        if key2=="REMARKS":
+                            #print key2,value2
+                            #print "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                            for key3, value3 in value2.iteritems():
+                                #print key3,value3
                     
-                        if key3==find:
-                            print "HIHIT ******"
-                            print key3, value3
-                            print key,value
-                            print "ORIGINAL KEY:{0}  ORIGINAL REMARK KEY:{1}".format(key,key3)
-                            print "SUMMARY:{0}".format(value3["SUMMARY"])
+                                if key3==find:
+                                    print "*********** HIHIT ******"
+                                    #print key3, value3
+                                    #print key,value
+                                    print "ORIGINAL KEY:{0}  ORIGINAL REMARK KEY:{1}".format(key,key3)
+                                    print "SUMMARY:{0}".format(value3["SUMMARY"].encode('utf-8'))
                 
-         #   print "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+                
+                
+                i=i+1
+    else:
+        print "--> No attachments??"
     
     
     
-      
-    #print Issues     
+  
         
     end = time.clock()
     totaltime=end-start
