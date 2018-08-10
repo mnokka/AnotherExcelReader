@@ -22,8 +22,10 @@ from CreateIssue import CreateIssue
 import glob
 import re
 import os
+import time
 
- 
+
+start = time.clock()
 __version__ = "0.2.1394"
 
 
@@ -285,7 +287,7 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
             Issues[KEY]["SHIP"] = SHIP
             
             PERFORMER=(CurrentSheet.cell(row=i, column=P).value)
-            Issues[KEY]["PERFORMER"] = PERFORMER.encode('utf-8')
+            Issues[KEY]["PERFORMER"] = PERFORMER # .encode('utf-8')
             
               
             #RESPHONE=(CurrentSheet.cell(row=i, column=U).value)
@@ -352,6 +354,7 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                 #Issues[KEY]["REMARKS"]={}
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY] = {}
                 
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["REMARKKEY"] = REMARKKEY
                 
                 # Just hardcode operattions, POC is one off
                 #DECK=SubCurrentSheet['AA{0}'.format(i)].value  # column AA holds DECK
@@ -405,13 +408,65 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
     #print Issues
         #for issue in Issues:
         #    print "ISSUE: {0}".format(issue)
-    for key, value in Issues.items() :
-            print key,value
-            print "--------------------------------------------------------"
-      
-         
+    #for key, value in Issues.items() :
+            #print key,value
+            #if (Issues[key]["REMARKS"][REMARKKEY]["REMARKKEY"] == "3135983"):
+            #if ("3135983" in Issues):
+            #   print key,value
+            
+            #for subdirec in value:
+            # print "v:{0}".format(subdirec)   
+            # if (subdirec=="REMARKS"):
+            #     print "REMARKS"
+             
+    #find="3135983"
+    find=3128668
+    #find="REMARKKEY"
+    
+    #for i in Issues:   # .keys():
         
-
+      ## print "key:{1} subkey:{0}".format(Issues[i].keys(),i)
+       
+       #for j in Issues[i].keys():
+       #    print "j:{0}".format(j)
+       
+       ##if find in Issues[i].keys():
+            
+            #print "KEY:"
+            #print "HIT:{i}".format(Issues[i])
+           # for j in  Issues[i]:
+           #     if find in j:
+           #         print "HIT"   
+                            
+            #print "--------------------------------------------------------"
+    
+    
+    for key, value in Issues.iteritems() :
+        #print key, value
+        #print "************************************"
+        for key2, value2 in value.iteritems():
+            #print key2, value2
+            if key2=="REMARKS":
+                #print key2,value2
+                
+                for key3, value3 in value2.iteritems():
+                    #print key3,value3
+                    
+                        if key3==find:
+                            print "HIHIT ******"
+                            print key3, value3
+                            print key,value
+                
+         #   print "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+    
+    
+    
+      
+    #print Issues     
+        
+    end = time.clock()
+    totaltime=end-start
+    print "Time taken:{0} seconds".format(totaltime)
        
             
     print "*************************************************************************"
