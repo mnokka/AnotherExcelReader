@@ -419,9 +419,10 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
         # Attachment 1016:..\..\MIKAN_TYO\ASIAKKAAT\Meyer\tsp\04_Attachment Remarks\394_3429854\3429854_IMG_0330.JPG
 
             i=1
+      
             for item in attachments: # check them all
                 #jira.add_attachment(issue=IssueID, attachment=attachments[0])
-                print "*****************************************"
+                print "\n\n****PROCESSING ITEM *************************************"
                 print "Attachment {0}:{1}".format(i,item)
                 regex = r"(\\)(\d\d\d)(_)(\d+)(\\)(.*)"
                 regex2=r"(.*?)(\\)(\d\d\d)(_)(\d+)(\\)(.*)"
@@ -433,29 +434,35 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                 path=match2.group(1)+match2.group(2)+match2.group(3)+match2.group(4)+match2.group(5)
                 print "Attachment remark ID:{0}".format(hit)
                 
-                
+               
                 find=int(hit)
                  # uses "find" to define which remark original ID is being searched
                 for key, value in Issues.iteritems() :
                     #print key, value
                     #print "************************************"
+                    
                     for key2, value2 in value.iteritems():
                         #print key2, value2
                         if key2=="REMARKS":
                             #print key2,value2
                             #print "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                
                             for key3, value3 in value2.iteritems():
                                 #print key3,value3
                     
                                 if key3==find:
-                                    print "*********** HIHIT ******"
+                                    print "----->  FOUND MATCHING SUBTASK "
                                     #print key3, value3
                                     #print key,value
-                                    print "ORIGINAL KEY:{0}  ORIGINAL REMARK KEY:{1}".format(key,key3)
-                                    print "SUMMARY:{0}".format(value3["SUMMARY"].encode('utf-8'))
-                
-                
-                
+                                    print "--> Main issue original key:{0}   Original remark key:{1}".format(key,key3)
+                                    print "--> Remark symmaru text:{0}".format(value3["SUMMARY"].encode('utf-8'))
+                                    #jql_query = 'issueFunction in subtasksOf ("project = ShipsImport and cf[12317] ~ '125'") and summary ~ 'Summary for this subtask has not been defined' and SubTaskNW ~ '2809415'')
+                                    #demo 
+                                    #jql_query="project = ShipsImport and cf[12317] ~ '125'"
+                                    jql_query="(issueFunction in subtasksOf (\"project = ShipsImport and cf[12317] ~ '125'\") and summary ~ 'Summary for this subtask has not been defined' and SubTaskNW ~ '2809415')"
+                                    ask_it=jira.search_issues(jql_query)
+                                    print "palaute:{0}".format(ask_it)       
+           
                 i=i+1
     else:
         print "--> No attachments??"
