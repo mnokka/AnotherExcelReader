@@ -25,9 +25,13 @@ import os
 import time
 
 
+
 start = time.clock()
 __version__ = "0.2.1394"
 
+# should pass via parameters
+#ENV="demo"
+ENV="PROD"
 
 logging.basicConfig(level=logging.DEBUG) # IF calling from Groovy, this must be set logging level DEBUG in Groovy side order these to be written out
 
@@ -89,7 +93,7 @@ def main(argv):
         
 
 
-    Parse(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfilepath,filename)
+    Parse(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfilepath,filename,ENV)
 
 
 ############################################################################################################################################
@@ -98,7 +102,7 @@ def main(argv):
 
 #NOTE: Uses hardcoded sheet/column value
 
-def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfilepath,filename):
+def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfilepath,filename,ENV):
     logging.debug ("Attachment Filepath: %s   " %(filepath))
     files=excelfilepath+"/"+filename
     logging.debug ("File:{0}".format(files))
@@ -455,13 +459,22 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                                     #print key3, value3
                                     #print key,value
                                     print "--> Main issue original key:{0}   Original remark key:{1}".format(key,key3)
-                                    print "--> Remark symmaru text:{0}".format(value3["SUMMARY"].encode('utf-8'))
+                                    summary_text=value3["SUMMARY"].encode('utf-8')
+                                    print "--> Remark symmaru text:{0}".format(summary_text)
                                     #jql_query = 'issueFunction in subtasksOf ("project = ShipsImport and cf[12317] ~ '125'") and summary ~ 'Summary for this subtask has not been defined' and SubTaskNW ~ '2809415'')
                                     #demo 
                                     #jql_query="project = ShipsImport and cf[12317] ~ '125'"
-                                    jql_query="(issueFunction in subtasksOf (\"project = ShipsImport and cf[12317] ~ '125'\") and summary ~ 'Summary for this subtask has not been defined' and SubTaskNW ~ '2809415')"
+                                    #jql_query="(issueFunction in subtasksOf (\"project = ShipsImport and cf[12317] ~ '125'\") and summary ~ 'Summary for this subtask has not been defined' and SubTaskNW ~ '2809415')"
+                                    
+                                    #Set custome filed hard way, one really should use the names
+                                    if (ENV=="demo"):
+                                        key_field="cf[12317]"
+                                    if (ENV=="PROD"):
+                                        key_field="cf[12900]"
+                                    jql_query="(issueFunction in subtasksOf (\"project = {0} and {1} ~ {2}\") and summary ~'{3}' and SubTaskNW ~ {4})".format(JIRAPROJECT,key_field,key,summary_text,key3)
                                     ask_it=jira.search_issues(jql_query)
-                                    print "palaute:{0}".format(ask_it)       
+                                    print "Query:{0}".format(jql_query)
+                                    print "Feedback:{0}".format(ask_it)       
            
                 i=i+1
     else:
