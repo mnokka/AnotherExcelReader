@@ -1,4 +1,4 @@
-#encoding=latin1
+#encoding=utf8
 
 # POC tool to add attachments to existing Jira issues
 # Attachment will have Key field in their name. This field exists in Jira issue, thus one can search matching Jira issue for operation
@@ -23,15 +23,15 @@ import glob
 import re
 import os
 import time
-
+import unidecode
 
 
 start = time.clock()
-__version__ = "0.2.1394"
+__version__ = u"0.2.1394"
 
 # should pass via parameters
 #ENV="demo"
-ENV="PROD"
+ENV=u"PROD"
 
 logging.basicConfig(level=logging.DEBUG) # IF calling from Groovy, this must be set logging level DEBUG in Groovy side order these to be written out
 
@@ -39,12 +39,12 @@ logging.basicConfig(level=logging.DEBUG) # IF calling from Groovy, this must be 
 
 def main(argv):
     
-    JIRASERVICE=""
-    JIRAPROJECT=""
-    PSWD=''
-    USER=''
+    JIRASERVICE=u""
+    JIRAPROJECT=u""
+    PSWD=u''
+    USER=u''
   
-    logging.debug ("--Python starting checking Jira issues for attachemnt adding --") 
+    logging.debug (u"--Python starting checking Jira issues for attachemnt adding --") 
 
  
     parser = argparse.ArgumentParser(usage="""
@@ -67,7 +67,7 @@ def main(argv):
     parser.add_argument('-s','--service', help='<JIRA service>')
     parser.add_argument('-p','--project', help='<JIRA project>')
     parser.add_argument('-z','--rename', help='<rename files>') #adhoc operation activation
-   
+    parser.add_argument('-x','--ascii', help='<ascii file names>') #adhoc operation activation
         
     args = parser.parse_args()
     
@@ -85,15 +85,81 @@ def main(argv):
     PSWD= args.password or ''
     USER= args.user or ''
     RENAME= args.rename or ''
+    ASCII=args.ascii or ''
     
     # quick old-school way to check needed parameters
     if (filepath=='' or  JIRASERVICE=='' or  JIRAPROJECT==''  or PSWD=='' or USER=='' or subfilename=='' or excelfilepath=='' or filename==''):
         parser.print_help()
         sys.exit(2)
         
-
-
+    #adhoc ascii conversion to file names (��� and german letters off)
+    if (ASCII):
+       DoAscii(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfilepath,filename,ENV)
+       exit()
+    
+    fggffg
     Parse(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfilepath,filename,ENV)
+
+
+######################################################
+
+def DoAscii(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfilepath,filename,ENV):
+
+
+ #Deactivated renaming command     
+    attachments=glob.glob("{0}/*/*".format(filepath))
+    if (len(attachments) > 0): # if any attachment with key embedded to name found
+        
+        # convert file names to ascii
+        if (1):
+            i=1
+            for item in attachments: # add them all
+                #jira.add_attachment(issue=IssueID, attachment=attachments[0])
+                print "*****************************************"
+                print "Attachment {0}:{1}".format(i,item)
+                regex = r"(\\)(\d\d\d)(_)(\d+)(\\)(.*)"
+                regex2=r"(.*?)(\\)(\d\d\d)(_)(\d+)(\\)(.*)"
+                
+                match = re.search(regex, item)
+                match2 = re.search(regex2, item)
+             
+                path=match2.group(1)+match2.group(2)+match2.group(3)+match2.group(4)+match2.group(5)
+                origname=match2.group(7)
+                print "Original name:{0}".format(origname)
+                #newname=unidecode.unidecode(u'{0}').format(origname)
+                
+                #newname=unidecode.unidecode(origname)
+                #newname=origname.encode('utf-8')
+                command="unidecode -c \"{0}\"".format(origname) # did not get working directly
+                print "Command: {0}".format(command)
+                newname=os.popen(command).read()
+                
+                
+                print "GOING TO DO UNIDECODING:{0} ---->  {1}".format(origname,newname)
+                print "New name:{0}".format(newname)
+                print "Path: {0}".format(path)
+                newfile=path+"\\"+newname
+                print "Newfile: {0}".format(newfile)
+                if (item==newfile):
+                    print "No need for ascii renaming"
+                else:
+                    new_item= item
+                    x=new_item.replace("\\","\\\\")
+                    y=newfile.replace("\\","\\\\")
+                    y=y.replace("\n","") #remove linefeed created somewhere earlier
+                    print "GOING TO DO RENAMING:{0} ---->{1}".format(x,y)
+                    os.rename(x,y)
+                    print "Done!!!"
+                    print "-------------------------------------------------------------------"
+                i=i+1
+        else:
+            print "--> Renaming bypassed"
+
+
+
+
+
+
 
 
 ############################################################################################################################################
@@ -196,6 +262,7 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
     
     #Deactivated renaming command     
     attachments=glob.glob("{0}/*/*".format(filepath))
+
     if (len(attachments) > 0): # if any attachment with key embedded to name found
         
         # RENAME ATTACHMENT FILES USING DIRECTORY ID NUMBER
@@ -460,6 +527,8 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                                     #print key,value
                                     print "--> Main issue original key:{0}   Original remark key:{1}".format(key,key3)
                                     summary_text=value3["SUMMARY"].encode('utf-8')
+                                    summary_text=summary_text.replace("\n", " ") # Perl used to have chomp, this was only Python way to do this. USED IN TICKET CREATION VERSION OF THE TOOL
+                                    summary_text=summary_text[:254] ## summary max length is 255
                                     print "--> Remark symmaru text:{0}".format(summary_text)
                                     #jql_query = 'issueFunction in subtasksOf ("project = ShipsImport and cf[12317] ~ '125'") and summary ~ 'Summary for this subtask has not been defined' and SubTaskNW ~ '2809415'')
                                     #demo 
@@ -471,11 +540,15 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                                         key_field="cf[12317]"
                                     if (ENV=="PROD"):
                                         key_field="cf[12900]"
-                                    jql_query="(issueFunction in subtasksOf (\"project = {0} and {1} ~ {2}\") and summary ~'{3}' and SubTaskNW ~ {4})".format(JIRAPROJECT,key_field,key,summary_text,key3)
+                                    jql_query="(issueFunction in subtasksOf (\"project = {0} and {1} ~ {2}\") and (summary ~'{3}' or SubTaskNW ~ {4}))".format(JIRAPROJECT,key_field,key,summary_text,key3)
                                     ask_it=jira.search_issues(jql_query)
                                     print "Query:{0}".format(jql_query)
-                                    print "Feedback:{0}".format(ask_it)       
-           
+                                    print "Feedback:{0}".format(ask_it) 
+                                    #jira_key=ask_it.key
+                                    for issue in ask_it:
+                                        print "-----> GOING TO ADD ATTACHMENT:{0}\n TO JIRA ISSUE:{1}\n  (Summaray:{2})".format(item,issue.key,issue.fields.summary.encode('utf-8'))      
+                                        jira.add_attachment(issue=issue.key, attachment=item)
+                                        print "Attachment:{0} added".format(item)
                 i=i+1
     else:
         print "--> No attachments??"
