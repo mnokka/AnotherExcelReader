@@ -97,7 +97,7 @@ def main(argv):
        DoAscii(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfilepath,filename,ENV)
        exit()
     
-    fggffg
+    
     Parse(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfilepath,filename,ENV)
 
 
