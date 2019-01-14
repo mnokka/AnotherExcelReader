@@ -24,7 +24,7 @@ import re
 import os
 import time
 import unidecode
-
+import array as arr
 
 start = time.clock()
 __version__ = u"0.3.1394" 
@@ -264,11 +264,28 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
     jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
 
     
-    print "FORCE ENDING 1"
-    sys.exit(5)
+  
     
     #Deactivated renaming command     
-    attachments=glob.glob("{0}/*/*".format(filepath))
+    #attachments=glob.glob("{0}/*/*".format(filepath))
+
+
+            
+    attachments=[]
+    rootDir2 =os.path.realpath(filepath) # from args, assuming .
+    for dirName, subdirList, fileList in os.walk(rootDir2):
+        print "***********************************************"
+        print('Found directory: %s' % dirName)
+        print("Listing files:")
+   
+        for name in fileList:
+            fullpathed = os.path.join(dirName, name)
+            print(fullpathed)
+            attachments.append(fullpathed)
+        #for name in dirs:
+        #    print(os.path.join(dirName, name)) 
+            
+            
 
     if (len(attachments) > 0): # if any attachment with key embedded to name found
         
@@ -305,12 +322,19 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
         i=1
         for item in attachments: # add them all
             print "Attachment {0}:{1}".format(i,item)
+            if os.path.isdir(item):
+                 print "IS DIRECTORY"
+            #else:
+            #    print "NOT DIRECTORY"
             i=i+1
-            
+
     
         #Find remark's original parent ID using 1) remark ID in the file name 2) remark excel 
         #print "--> SUBTASK EXCEL: {0}".format(subfilename)
         
+    print "FORCE ENDING 1"
+    sys.exit(5)  
+      
         
     ### MAIN EXCEL ###########################################################################################
     #Go through main excel sheet for main issue keys (and contents findings)
