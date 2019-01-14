@@ -276,11 +276,11 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
     for dirName, subdirList, fileList in os.walk(rootDir2):
         print "***********************************************"
         print('Found directory: %s' % dirName)
-        print("Listing files:")
+       # print("Listing files:")
    
         for name in fileList:
             fullpathed = os.path.join(dirName, name)
-            print(fullpathed)
+            #print(fullpathed)
             attachments.append(fullpathed)
         #for name in dirs:
         #    print(os.path.join(dirName, name)) 
@@ -293,6 +293,7 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
         # FILE Attachment 1016:..\..\MIKAN_TYO\ASIAKKAAT\Meyer\tsp\04_Attachment Remarks\394_3429854\IMG_0330.JPG RENAMING -->
         # Attachment 1016:..\..\MIKAN_TYO\ASIAKKAAT\Meyer\tsp\04_Attachment Remarks\394_3429854\3429854_IMG_0330.JPG
         if (RENAME):
+            #NOT IMPLEMENTED FOR PHASE2
             i=1
             for item in attachments: # add them all
                 #jira.add_attachment(issue=IssueID, attachment=attachments[0])
@@ -329,195 +330,54 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
             i=i+1
 
     
-        #Find remark's original parent ID using 1) remark ID in the file name 2) remark excel 
+        #Find remark's original parent ID using 1) remark ID in the file name 
         #print "--> SUBTASK EXCEL: {0}".format(subfilename)
         
+  
+        
+   
+    if (len(attachments) > 0): # if any attachment with key embedded to name found
+        
+
+
+            i=1
+      
+            for item in attachments: # check them all
+                #jira.add_attachment(issue=IssueID, attachment=attachments[0])
+                print "\n\n****PROCESSING ITEM *************************************"
+                print "Attachment {0}:{1}".format(i,item)
+               
+                regex = r"(\\)(\d\d\d)(_)(\d+)(\\)(.*)"
+                #regex = r"(\\)(\d\d\d)(_)(\d+)(\\)(.*)"
+                regex2=r"(.*?)(\\)(INSP_\d\d\d)(_No)(\d+)(_)(.*)"
+                #test_str = "\\394_3428553\\"
+                match = re.search(regex, item)
+                match2 = re.search(regex2, item)
+                
+                if (match):
+                    hit=match.group(4)
+                    print "Attachment old issue number ID:{0}".format(hit)
+                
+                elif (match2):
+                    hit=match2.group(5)
+                    print "Attachment old issue number ID:{0}".format(hit)
+                
+                else:
+                    print "no match"
+               
+                #find=int(hit)
+                 # uses "find" to define which remark original ID is being searched
+                i=i+1
+
+    
     print "FORCE ENDING 1"
     sys.exit(5)  
       
-        
-    ### MAIN EXCEL ###########################################################################################
-    #Go through main excel sheet for main issue keys (and contents findings)
-    # Create dictionary structure (remarks)
-    # NOTE: Uses hardcoded sheet/column values
-    # NOTE: As this handles first sheet, using used row/cell reading (buggy, works only for first sheet) 
-    #
-    i=DATASTARTSROW # brute force row indexing
-    for row in CurrentSheet[('B{}:B{}'.format(DATASTARTSROW,CurrentSheet.max_row))]:  # go trough all column B (KEY) rows
-        for mycell in row:
-            KEY=mycell.value
-            logging.debug("ROW:{0} Original ID:{1}".format(i,mycell.value))
-            Issues[KEY]={} # add to dictionary as master key (KEY)
-            
-            #Just hardocode operations, POC is one off
-            #LINKED_ISSUES=(CurrentSheet.cell(row=i, column=K).value) #NOTE THIS APPROACH GOES ALWAYS TO THE FIRST SHEET
-            #logging.debug("Attachment:{0}".format((CurrentSheet.cell(row=i, column=K).value))) # for the same row, show also column K (LINKED_ISSUES) values
-            #Issues[KEY]["LINKED_ISSUES"] = LINKED_ISSUES
-            
-            SUMMARY=(CurrentSheet.cell(row=i, column=C).value)
-            if not SUMMARY:
-                SUMMARY="Summary for this task has not been defined"
-            Issues[KEY]["SUMMARY"] = SUMMARY
-            
-            ISSUE_TYPE=(CurrentSheet.cell(row=i, column=D).value)
-            Issues[KEY]["ISSUE_TYPE"] = ISSUE_TYPE
-            
-            STATUS=(CurrentSheet.cell(row=i, column=E).value)
-            Issues[KEY]["STATUS"] = STATUS
-            
-            RESPONSIBLE=(CurrentSheet.cell(row=i, column=G).value)
-            Issues[KEY]["RESPONSIBLE"] = RESPONSIBLE.encode('utf-8')
-            
-            #REPORTER=(CurrentSheet.cell(row=i, column=G).value)
-            #Issues[KEY]["REPORTER"] = REPORTER
-            
-            
-            CREATOR=(CurrentSheet.cell(row=i, column=H).value)
-            Issues[KEY]["CREATOR"] = CREATOR
-            
-            CREATED=(CurrentSheet.cell(row=i, column=I).value) #Inspection date
-            # ISO 8601 conversion to Exceli time
-            time2=CREATED.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
-            print "CREATED ISOFORMAT TIME2:{0}".format(time2)
-            CREATED=time2
-            INSPECTED=CREATED # just reusing value
-            Issues[KEY]["INSPECTED"] = INSPECTED
-            
-            
-            SHIP=(CurrentSheet.cell(row=i, column=M).value)
-            Issues[KEY]["SHIP"] = SHIP
-            
-            PERFORMER=(CurrentSheet.cell(row=i, column=P).value)
-            Issues[KEY]["PERFORMER"] = PERFORMER # .encode('utf-8')
-            
-              
-            #RESPHONE=(CurrentSheet.cell(row=i, column=U).value)
-            #Issues[KEY]["RESPHONE"] = RESPHONE
-            
-            DEPARTMENT=(CurrentSheet.cell(row=i, column=S).value)
-            Issues[KEY]["DEPARTMENT"] = DEPARTMENT
-            
-            DECK=(CurrentSheet.cell(row=i, column=V).value)
-            Issues[KEY]["DECK"] = DECK
-            
-            BLOCK=(CurrentSheet.cell(row=i, column=W).value)
-            Issues[KEY]["BLOCK"] = BLOCK
-            
-            FIREZONE=(CurrentSheet.cell(row=i, column=X).value)
-            Issues[KEY]["FIREZONE"] = FIREZONE
-            
-                
-            SYSTEMNUMBER=(CurrentSheet.cell(row=i, column=N).value)
-            Issues[KEY]["SYSTEMNUMBER"] = SYSTEMNUMBER
-            
-            
-            
-            
-            #Create sub dictionary for possible subtasks (to be used later)
-            Issues[KEY]["REMARKS"]={}
-            
-            logging.debug("---------------------------------------------------")
-            i=i+1
-    #print Issues
-    #print Issues.items() 
-    
-    #key=18503 # check if this key exists
-    #if key in Issues:
-    #    print "EXISTS"
-    #else:
-    #    print "NOT THERE"
-    #for key, value in Issues.iteritems() :
-    #    print key, value
-   
-        
-    #######REMARK EXCEL #####################################################################################################################
-    # Check any remarks (subtasks) for main issue
-    # NOTE: Uses hardcoded sheet/column values
-    #
-    #removed currently dfue excel changes
-
-    i=DATASTARTSROWSUB # brute force row indexing
-    for row in SubCurrentSheet[('B{}:B{}'.format(DATASTARTSROWSUB,SubCurrentSheet.max_row))]:  # go trough all column B (KEY) rows
-        for submycell in row:
-            PARENTKEY=submycell.value
-            logging.debug("SUBROW:{0} Original PARENT ID:{1}".format(i,PARENTKEY))
-            #Issues[KEY]={} # add to dictionary as master key (KEY)
-            
-            #Just hardocode operations, POC is one off
-            #LINKED_ISSUES=(CurrentSheet.cell(row=i, column=K).value) #NOTE THIS APPROACH GOES ALWAYS TO THE FIRST SHEET
-            #logging.debug("Attachment:{0}".format((CurrentSheet.cell(row=i, column=K).value))) # for the same row, show also column K (LINKED_ISSUES) values
-            #Issues[KEY]["LINKED_ISSUES"] = LINKED_ISSUES
-            if PARENTKEY in Issues:
-                print "Subtask has a known parent {0}".format(PARENTKEY)
-                #REMARKKEY=SubCurrentSheet['J{0}'.format(i)].value  # column J holds Task-ID NW
-                REMARKKEY=(SubCurrentSheet.cell(row=i, column=J).value)
-                print "REMARKKEY:{0}".format(REMARKKEY)
-                #Issues[KEY]["REMARKS"]={}
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY] = {}
-                
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["REMARKKEY"] = REMARKKEY
-                
-                # Just hardcode operattions, POC is one off
-                #DECK=SubCurrentSheet['AA{0}'.format(i)].value  # column AA holds DECK
-                SUBDECK=(SubCurrentSheet.cell(row=i, column=AA).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DECK"] = SUBDECK
-                
-                SUBBLOCK=(SubCurrentSheet.cell(row=i, column=X).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["BLOCK"] = SUBBLOCK
-                
-                SUBPERFORMER=(SubCurrentSheet.cell(row=i, column=Q).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["PERFORMER"] = SUBPERFORMER
-                
-                SUBRESPONSIBLE=(SubCurrentSheet.cell(row=i, column=R).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["RESPONSIBLE"] = SUBRESPONSIBLE
-                
-                SUBDEPARTMENT=(SubCurrentSheet.cell(row=i, column=W).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DEPARTMENT"] = SUBDEPARTMENT
-                
-                SUBISSUETYPE=(SubCurrentSheet.cell(row=i, column=D).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["ISSUETYPE"] = SUBISSUETYPE
-                
-                SUBSYSTEMNUMBER=(SubCurrentSheet.cell(row=i, column=N).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SYSTEMNUMBER"] = SUBSYSTEMNUMBER
-                
-                SUBSUMMARY=(SubCurrentSheet.cell(row=i, column=C).value)
-                if not SUBSUMMARY:
-                    SUBSUMMARY="Summary for this subtask has not been defined"
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUMMARY"] = SUBSUMMARY
-                
-                SUBCREATED=(SubCurrentSheet.cell(row=i, column=I).value) #Inspection date
-                # ISO 8601 conversion to Exceli time
-                subtime2=SUBCREATED.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
-                print "CREATED SUBTASK ISOFORMAT TIME2:{0}".format(subtime2)
-                SUBCREATED=subtime2
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUBCREATED"] = SUBCREATED
-                
-                JIRASUBDESCRIPTION="Remark for Inspection Report"
-                SUBTASKID=REMARKKEY
-            
-            else:
-                    print "ERROR: Unknown parent found"
-            print "----------------------------------"
-            i=i+1
-           
-       
-         
-    # Now orignal dictionary has been re-created (used to crate Jira issues)
-    # Use file name embedded remark ID to find orignal main issue key (in old ticketing system) and remark summmay text
-    # these info needed, when deciding to which Jira remark (subtask) to attach curren attachment file
-    
-             
-    find=3135983
-    #find=3128668
-
     
     
-    attachments=glob.glob("{0}/*/*".format(filepath)) # get all attachments
     if (len(attachments) > 0): # if any attachment with key embedded to name found
         
-        # RENAME ATTACHMENT FILES USING DIRECTORY ID NUMBER
-        # FILE Attachment 1016:..\..\MIKAN_TYO\ASIAKKAAT\Meyer\tsp\04_Attachment Remarks\394_3429854\IMG_0330.JPG RENAMING -->
-        # Attachment 1016:..\..\MIKAN_TYO\ASIAKKAAT\Meyer\tsp\04_Attachment Remarks\394_3429854\3429854_IMG_0330.JPG
+
 
             i=1
       
@@ -577,8 +437,8 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                                     #jira_key=ask_it.key
                                     for issue in ask_it:
                                         print "-----> GOING TO ADD ATTACHMENT:{0}\n TO JIRA ISSUE:{1}\n  (Summaray:{2})".format(item,issue.key,issue.fields.summary.encode('utf-8'))      
-                                        jira.add_attachment(issue=issue.key, attachment=item)
-                                        print "Attachment:{0} added".format(item)
+                                        #jira.add_attachment(issue=issue.key, attachment=item)
+                                        #print "Attachment:{0} added".format(item)
                 i=i+1
     else:
         print "--> No attachments??"
