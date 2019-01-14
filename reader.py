@@ -27,7 +27,7 @@ import unidecode
 
 
 start = time.clock()
-__version__ = u"0.2.1394"
+__version__ = u"0.3.1394" 
 
 # should pass via parameters
 #ENV="demo"
@@ -59,6 +59,7 @@ def main(argv):
     parser.add_argument('-f','--filepath', help='<Path to attachment directory>')
     parser.add_argument('-q','--excelfilepath', help='<Path to excel directory>')
     parser.add_argument('-n','--filename', help='<Main tasks Excel filename>')
+    
     parser.add_argument('-m','--subfilename', help='<Subtasks Excel filename>')
     parser.add_argument('-v','--version', help='<Version>', action='store_true')
     
@@ -78,7 +79,7 @@ def main(argv):
     filepath = args.filepath or ''
     excelfilepath = args.excelfilepath or ''
     filename = args.filename or ''
-    subfilename=args.subfilename or ''
+    subfilename=args.subfilename or 'NOTDEFINED' #not needed
     
     JIRASERVICE = args.service or ''
     JIRAPROJECT = args.project or ''
@@ -88,8 +89,9 @@ def main(argv):
     ASCII=args.ascii or ''
     
     # quick old-school way to check needed parameters
-    if (filepath=='' or  JIRASERVICE=='' or  JIRAPROJECT==''  or PSWD=='' or USER=='' or subfilename=='' or excelfilepath=='' or filename==''):
+    if (filepath=='' or  JIRASERVICE=='' or  JIRAPROJECT==''  or PSWD=='' or USER==''  or excelfilepath=='' or filename==''):
         parser.print_help()
+        print "args: {0}".format(args)
         sys.exit(2)
         
     #adhoc ascii conversion to file names (��� and german letters off)
@@ -189,17 +191,17 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
    
     #subtasks excel definitions
     logging.debug ("ExcelFilepath: %s     ExcelFilename:%s" %(excelfilepath ,subfilename))
-    subfiles=excelfilepath+"/"+subfilename
-    logging.debug ("SubFiles:{0}".format(subfiles))
+    #subfiles=excelfilepath+"/"+subfilename
+    #logging.debug ("SubFiles:{0}".format(subfiles))
    
     
-    SubMainSheet="general_report" 
-    subwb= openpyxl.load_workbook(subfiles)
+    #SubMainSheet="general_report" 
+    #subwb= openpyxl.load_workbook(subfiles) 
     #types=type(wb)
     #logging.debug ("Type:{0}".format(types))
     #sheets=wb.get_sheet_names()
     #logging.debug ("Sheets:{0}".format(sheets))
-    SubCurrentSheet=subwb[SubMainSheet] 
+    #SubCurrentSheet=subwb[SubMainSheet] 
     #logging.debug ("CurrentSheet:{0}".format(CurrentSheet))
     #logging.debug ("First row:{0}".format(CurrentSheet['A4'].value))
    
@@ -256,9 +258,14 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
     
     
     
+   
+    
     Authenticate(JIRASERVICE,PSWD,USER)
     jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
 
+    
+    print "FORCE ENDING 1"
+    sys.exit(5)
     
     #Deactivated renaming command     
     attachments=glob.glob("{0}/*/*".format(filepath))
@@ -300,10 +307,9 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
             print "Attachment {0}:{1}".format(i,item)
             i=i+1
             
-            
+    
         #Find remark's original parent ID using 1) remark ID in the file name 2) remark excel 
-        
-        print "--> SUBTASK EXCEL: {0}".format(subfilename)
+        #print "--> SUBTASK EXCEL: {0}".format(subfilename)
         
         
     ### MAIN EXCEL ###########################################################################################
