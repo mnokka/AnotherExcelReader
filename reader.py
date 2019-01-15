@@ -341,7 +341,7 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
 
 
             i=1
-      
+            go=0
             for item in attachments: # check them all
                 #jira.add_attachment(issue=IssueID, attachment=attachments[0])
                 print "\n\n****PROCESSING ITEM *************************************"
@@ -357,17 +357,45 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                 if (match):
                     hit=match.group(4)
                     print "Attachment old issue number ID:{0}".format(hit)
+                    go=1
                 
                 elif (match2):
                     hit=match2.group(5)
                     print "Attachment old issue number ID:{0}".format(hit)
-                
+                    go=1         
                 else:
                     print "no match"
+                    go=0
                
                 #find=int(hit)
                  # uses "find" to define which remark original ID is being searched
+                 
+                 
+                summary_text="kissa" #not needed here
+                
+                if (go==1):
+                    key3=hit 
+                    #Set custome filed hard way, one really should use the names
+                    if (ENV=="demo"):
+                        key_field="cf[12317]"
+                    if (ENV=="PROD"):
+                        key_field="cf[12900]"
+                
+                        jql_query="project = {0} and {1} ~ {2}".format(JIRAPROJECT,key_field,key3)
+                        print "Query:{0}".format(jql_query)
+                        #project = NB1394FERU and cf[12900] ~ 470
+                        ask_it=jira.search_issues(jql_query)
+                        print "Query:{0}".format(jql_query)
+                        print "Feedback:{0}".format(ask_it) 
+                                    #jira_key=ask_it.key
+                    for issue in ask_it:
+                        print "-----> GOING TO ADD ATTACHMENT:{0}\n TO JIRA ISSUE:{1}\n  (Summary:{2})".format(item,issue.key,issue.fields.summary.encode('utf-8'))      
+                        # this makes the chamge!
+                        #jira.add_attachment(issue=issue.key, attachment=item)
+                        #print "Attachment:{0} added".format(item) 
+                 
                 i=i+1
+                go=0
 
     
     print "FORCE ENDING 1"
@@ -430,7 +458,7 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                                         key_field="cf[12317]"
                                     if (ENV=="PROD"):
                                         key_field="cf[12900]"
-                                    jql_query="(issueFunction in subtasksOf (\"project = {0} and {1} ~ {2}\") and (summary ~'{3}' or SubTaskNW ~ {4}))".format(JIRAPROJECT,key_field,key,summary_text,key3)
+                                    #jql_query="project = {0} and {1} ~ {2}.format(JIRAPROJECT,key_field,key)
                                     ask_it=jira.search_issues(jql_query)
                                     print "Query:{0}".format(jql_query)
                                     print "Feedback:{0}".format(ask_it) 
