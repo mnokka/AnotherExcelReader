@@ -342,6 +342,7 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
 
             i=1
             go=0
+            INVENTORY={} #set dictionary
             for item in attachments: # check them all
                 #jira.add_attachment(issue=IssueID, attachment=attachments[0])
                 print "\n\n****PROCESSING ITEM *************************************"
@@ -387,9 +388,20 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                         ask_it=jira.search_issues(jql_query)
                         print "Query:{0}".format(jql_query)
                         print "Feedback:{0}".format(ask_it) 
-                                    #jira_key=ask_it.key
+                        
+                        
+                                 
                     for issue in ask_it:
                         print "-----> GOING TO ADD ATTACHMENT:{0}\n TO JIRA ISSUE:{1}\n  (Summary:{2})".format(item,issue.key,issue.fields.summary.encode('utf-8'))      
+                        
+                        #use dictionary to keep record of how many attachment for one issue
+                        if (issue.key in INVENTORY):
+                            value=INVENTORY.get(issue.key,"10000") # 1000 is default value
+                            value=value+1 
+                            INVENTORY[issue.key]=value
+                        else:
+                            INVENTORY[issue.key]=1 # first issue attachment, create entry for dictionary
+                        
                         # this makes the chamge!
                         #jira.add_attachment(issue=issue.key, attachment=item)
                         #print "Attachment:{0} added".format(item) 
@@ -398,8 +410,14 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                 go=0
 
     
+    for key,value in INVENTORY.items():
+        print "ISSUE:{0}  => ATTACHMENTS ADDITIONS: {1}".format(key,value)  
+        
     print "FORCE ENDING 1"
     sys.exit(5)  
+      
+
+      
       
     
     
