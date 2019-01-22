@@ -423,13 +423,13 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                         
                         
                         # this makes the chamge!
-                        #jira.add_attachment(issue=issue.key, attachment=item)
-                        #print "Attachment:{0} added".format(item) 
+                        jira.add_attachment(issue=issue.key, attachment=item)
+                        print "Attachment:{0} added".format(item) 
                  
                 i=i+1
                 go=0
                 sleep(0.5)
-                #if (i>40):
+                #if (i>23):
                 #    print "FORCE ENDING 1"
                 #    sys.exit(5)                      
     
