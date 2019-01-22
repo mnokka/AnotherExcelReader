@@ -25,6 +25,8 @@ import os
 import time
 import unidecode
 import array as arr
+from time import sleep
+
 
 start = time.clock()
 __version__ = u"0.3.1394" 
@@ -343,6 +345,8 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
             i=1
             go=0
             INVENTORY={} #set dictionary
+            NOPARENTS=[] #log pics without matching jira issue
+            ISSUTYPE={} #record issutypes
             for item in attachments: # check them all
                 #jira.add_attachment(issue=IssueID, attachment=attachments[0])
                 print "\n\n****PROCESSING ITEM *************************************"
@@ -388,7 +392,12 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                         ask_it=jira.search_issues(jql_query)
                         print "Query:{0}".format(jql_query)
                         print "Feedback:{0}".format(ask_it) 
-                        
+                        if not ask_it: 
+                            NOPARENTS.append(item)
+                            print "No parent found :{0}".format(item)
+                        else:
+                            print "Parent exists"
+                            
                         
                                  
                     for issue in ask_it:
@@ -399,8 +408,19 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                             value=INVENTORY.get(issue.key,"10000") # 1000 is default value
                             value=value+1 
                             INVENTORY[issue.key]=value
+                            print "Issue type: {0}".format(issue.fields.issuetype)
                         else:
                             INVENTORY[issue.key]=1 # first issue attachment, create entry for dictionary
+                            print "Issue type: {0}".format(issue.fields.issuetype)
+            
+                        i_type=str(issue.fields.issuetype)
+                        if (i_type in ISSUTYPE):
+                            value=ISSUTYPE.get(i_type,"10000") # 1000 is default value
+                            value=value+1 
+                            ISSUTYPE[i_type]=value
+                        else:
+                            ISSUTYPE[i_type]=1 # first issue attachment, create entry for dictionary
+                        
                         
                         # this makes the chamge!
                         #jira.add_attachment(issue=issue.key, attachment=item)
@@ -408,21 +428,27 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                  
                 i=i+1
                 go=0
-
+                sleep(0.5)
+                #if (i>40):
+                #    print "FORCE ENDING 1"
+                #    sys.exit(5)                      
     
     for key,value in INVENTORY.items():
         print "ISSUE:{0}  => ATTACHMENTS ADDITIONS: {1}".format(key,value)  
-        
-    print "FORCE ENDING 1"
-    sys.exit(5)  
+    
+    print "ORPHANT ATTACHMENT PICTURES:"
+    i=0
+    for f in NOPARENTS:
+        print "Orphan{0}:{1}".format(i,f)
+        i=i+1
+    
+    for key,value in ISSUTYPE.items():
+        print "ISSUETYPES:{0}  => NUMBER OF FOUND (WITH PARENTS) {1}".format(key,value)  
+    
+    #print "FORCE ENDING 1"
+    #sys.exit(5)  
       
 
-      
-      
-    
-    
-    
-    
   
         
     end = time.clock()
