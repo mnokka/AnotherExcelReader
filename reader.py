@@ -102,6 +102,9 @@ def main(argv):
        exit()
     
     
+    print "FORCE ENDING : PREVENT PARSING"
+    sys.exit(5) 
+    
     Parse(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfilepath,filename,ENV)
 
 
@@ -110,8 +113,55 @@ def main(argv):
 def DoAscii(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfilepath,filename,ENV):
 
 
+
+
+    attachments=[]
+    rootDir2 =os.path.realpath(filepath) # from args, assuming .
+    for dirName, subdirList, fileList in os.walk(rootDir2):
+        print "***********************************************"
+        print('Found directory: %s' % dirName)
+       # print("Listing files:")
+   
+        for name in fileList:
+            fullpathed = os.path.join(dirName, name)
+            #print "FILE:{0}".format(fullpathed)
+            attachments.append(fullpathed)
+        #for name in dirs:
+        #    print(os.path.join(dirName, name)) 
+
+    i=0
+    for item in attachments:
+        origname="KISSA"
+        print "FILENAME:{0}".format(item)
+        print "*****************************************"
+        print "Attachment {0}:{1}".format(i,item)
+        #regex2 = r"(.*)(\\)([^\\].*)(\.pdf$|\.PDF$)"
+        regex2 = r" (.*)(\\)([^\\].*)(\.pdf$|\.PDF$|\.jpg$|\.JPG$)"
+        #regex2=r"(.*?)(\\)(.*)(\.pdf|\.PDF)(z)"
+        match2 = re.search(regex2, item)
+        
+        if (match2): 
+            print "1:{0} 2:{1} 3:{2} 4:{3}".format(match2.group(1),match2.group(2),match2.group(3),match2.group(4))  
+            origname=match2.group(3)   
+        else:
+            print "no match"
+        #path=match2.group(1)+match2.group(2)+match2.group(3)+match2.group(4)+match2.group(5)
+        #origname=match2.group(7)
+        #print "Original name:{0}".format(origname)
+        #newname=unidecode.unidecode(u'{0}').format(origname)
+                
+        #newname=unidecode.unidecode(origname)
+        #newname=origname.encode('utf-8')
+        command="unidecode -c \"{0}\"".format(origname) # did not get working directly
+        print "Command WOULD BE: {0}".format(command)
+        # NOT newname=os.popen(command).read()
+        i=i+1
+
+    print "FORCE ENDING 1"
+    sys.exit(5)  
+
  #Deactivated renaming command     
-    attachments=glob.glob("{0}/*/*".format(filepath))
+   # attachments=glob.glob("{0}/*/*".format(filepath))
     if (len(attachments) > 0): # if any attachment with key embedded to name found
         
         # convert file names to ascii
@@ -135,8 +185,8 @@ def DoAscii(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelf
                 #newname=unidecode.unidecode(origname)
                 #newname=origname.encode('utf-8')
                 command="unidecode -c \"{0}\"".format(origname) # did not get working directly
-                print "Command: {0}".format(command)
-                newname=os.popen(command).read()
+                print "Command WOULD BE: {0}".format(command)
+               # NOT newname=os.popen(command).read()
                 
                 
                 print "GOING TO DO UNIDECODING:{0} ---->  {1}".format(origname,newname)
@@ -151,8 +201,8 @@ def DoAscii(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelf
                     x=new_item.replace("\\","\\\\")
                     y=newfile.replace("\\","\\\\")
                     y=y.replace("\n","") #remove linefeed created somewhere earlier
-                    print "GOING TO DO RENAMING:{0} ---->{1}".format(x,y)
-                    os.rename(x,y)
+                    print "SHOULD-WOULD GOING TO DO RENAMING:{0} ---->{1}".format(x,y)
+                    # NOT  os.rename(x,y)
                     print "Done!!!"
                     print "-------------------------------------------------------------------"
                 i=i+1
@@ -195,20 +245,7 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
     logging.debug ("ExcelFilepath: %s     ExcelFilename:%s" %(excelfilepath ,subfilename))
     #subfiles=excelfilepath+"/"+subfilename
     #logging.debug ("SubFiles:{0}".format(subfiles))
-   
-    
-    #SubMainSheet="general_report" 
-    #subwb= openpyxl.load_workbook(subfiles) 
-    #types=type(wb)
-    #logging.debug ("Type:{0}".format(types))
-    #sheets=wb.get_sheet_names()
-    #logging.debug ("Sheets:{0}".format(sheets))
-    #SubCurrentSheet=subwb[SubMainSheet] 
-    #logging.debug ("CurrentSheet:{0}".format(CurrentSheet))
-    #logging.debug ("First row:{0}".format(CurrentSheet['A4'].value))
-   
-   
-   
+ 
     
 
     
@@ -239,21 +276,7 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
     AA=27 #Subtask DeckNW
    
 
-    
-   
-    #print Issues.items() 
-    
-    #key=18503 # check if this key exists
-    #if key in Issues:
-    #    print "EXISTS"
-    #else:
-    #    print "NOT THERE"
-    #for key, value in Issues.iteritems() :
-    #    print key, value
 
-    #
-               
-    
 
 
     ##########################################################################################################################
@@ -423,10 +446,10 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                         
                         
                         # this makes the chamge!
-                        jira.add_attachment(issue=issue.key, attachment=item)
-                        print "Attachment:{0} added".format(item) 
+                       # jira.add_attachment(issue=issue.key, attachment=item)
+                       # print "Attachment:{0} added".format(item) 
                  
-                i=i+1
+                i=i+1 # check >ZZ7xxx
                 go=0
                 sleep(0.5)
                 #if (i>23):
