@@ -103,8 +103,8 @@ def main(argv):
        exit()
     
     
-    print "FORCE ENDING : PREVENT PARSING"
-    sys.exit(5) 
+    #print "FORCE ENDING : PREVENT PARSING"
+    #sys.exit(5) 
     
     Parse(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfilepath,filename,ENV)
 
@@ -420,10 +420,13 @@ def Parse(filepath, JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfi
                             ISSUTYPE[i_type]=1 # first issue attachment, create entry for dictionary
                         
                         
-                        # this makes the chamge!
-                       # jira.add_attachment(issue=issue.key, attachment=item)
-                       # print "Attachment:{0} added".format(item) 
-                 
+                        if (i>2793):
+                            print "INFO: i>2786 thus going to do the attachement!!!"
+                            # this makes the chamge!
+                            jira.add_attachment(issue=issue.key, attachment=item)
+                            print "Attachment:{0} added".format(item) 
+                        else:
+                           print "INFO: According i counter, this file has been attached earlier,skipping!!!"
                 i=i+1 # check >ZZ7xxx
                 go=0
                 sleep(0.5)
