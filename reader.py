@@ -99,6 +99,7 @@ def main(argv):
     #adhoc ascii conversion to file names (��� and german letters off)
     if (ASCII):
        DoAscii(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelfilepath,filename,ENV)
+       print "ASCII CONVER DONE"
        exit()
     
     
@@ -132,32 +133,33 @@ def DoAscii(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelf
     i=0
     for item in attachments:
         origname="KISSA"
+        origpath="KISSANPATH"
+        origext="KISSANDOC"
         print "FILENAME:{0}".format(item)
         print "*****************************************"
         print "Attachment {0}:{1}".format(i,item)
         #regex2 = r"(.*)(\\)([^\\].*)(\.pdf$|\.PDF$)"
-        regex2 = r" (.*)(\\)([^\\].*)(\.pdf$|\.PDF$|\.jpg$|\.JPG$)"
+        regex2 = r"(.*)(\\)([^\\].*)(\.pdf$|\.PDF$|\.jpg$|\.JPG$|\.doc$|\.DOC$)"
         #regex2=r"(.*?)(\\)(.*)(\.pdf|\.PDF)(z)"
         match2 = re.search(regex2, item)
         
         if (match2): 
-            print "1:{0} 2:{1} 3:{2} 4:{3}".format(match2.group(1),match2.group(2),match2.group(3),match2.group(4))  
+            #print "1:{0} 2:{1} 3:{2} 4:{3}".format(match2.group(1),match2.group(2),match2.group(3),match2.group(4))  
             origname=match2.group(3)   
+            origext=match2.group(4)
+            origpath=match2.group(1)
         else:
             print "no match"
-        #path=match2.group(1)+match2.group(2)+match2.group(3)+match2.group(4)+match2.group(5)
-        #origname=match2.group(7)
-        #print "Original name:{0}".format(origname)
-        #newname=unidecode.unidecode(u'{0}').format(origname)
-                
-        #newname=unidecode.unidecode(origname)
-        #newname=origname.encode('utf-8')
-        command="unidecode -c \"{0}\"".format(origname) # did not get working directly
+            print "ERROR: FORCE ENDING NO MATCH"
+          
+ 
+        createdNewName=origpath+"\\"+origname+origext
+        command="unidecode -c \"{0}\"".format(createdNewName) # did not get working directly
         print "Command WOULD BE: {0}".format(command)
         # NOT newname=os.popen(command).read()
         i=i+1
 
-    print "FORCE ENDING 1"
+    print "ASCII DONE. FORCE ENDING 1"
     sys.exit(5)  
 
  #Deactivated renaming command     
