@@ -135,8 +135,9 @@ def DoAscii(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelf
         origname="KISSA"
         origpath="KISSANPATH"
         origext="KISSANDOC"
+        origfullname="KISSA"
+        print "*****************************************************************************************"
         print "FILENAME:{0}".format(item)
-        print "*****************************************"
         print "Attachment {0}:{1}".format(i,item)
         #regex2 = r"(.*)(\\)([^\\].*)(\.pdf$|\.PDF$)"
         regex2 = r"(.*)(\\)([^\\].*)(\.pdf$|\.PDF$|\.jpg$|\.JPG$|\.doc$|\.DOC$)"
@@ -148,69 +149,41 @@ def DoAscii(filepath,JIRASERVICE,JIRAPROJECT,PSWD,USER,RENAME,subfilename,excelf
             origname=match2.group(3)   
             origext=match2.group(4)
             origpath=match2.group(1)
+            
+            origfullname=origname+origext
+            command="unidecode -c \"{0}\"".format(origfullname) # did not get working directly
+            print "Unicodecommand WOULD BE: {0}".format(command)
+            newname=os.popen(command).read()
+            #print "Unidecoded new filename: {0}".format(newname)
+           
+            print "GOING TO DO UNIDECODING:{0} ---->  {1}".format(origfullname,newname)
+            print "New unidecoded name:{0}".format(newname)
+            print "Path: {0}".format(origpath)
+            newfile=origpath+"\\"+newname
+            print "Newfile: {0}".format(newfile)
+            if (item==newfile):
+                print "OK: No need for ascii renaming"
+            else:
+                print "UNICODE: Need rename old filename" #defacto acter unidecoding
+                new_item= item
+                x=new_item.replace("\\","\\\\")
+                y=newfile.replace("\\","\\\\")
+                y=y.replace("\n","") #remove linefeed created somewhere earlier
+                print "SHOULD-WOULD GOING TO DO RENAMING:{0} ---->{1}".format(x,y)
+                os.rename(x,y)
+                print "Renaming Done!!!"
+         
+           
+            
+            
         else:
             print "no match"
             print "ERROR: FORCE ENDING NO MATCH"
-          
- 
-        createdNewName=origpath+"\\"+origname+origext
-        command="unidecode -c \"{0}\"".format(createdNewName) # did not get working directly
-        print "Command WOULD BE: {0}".format(command)
-        # NOT newname=os.popen(command).read()
+            
         i=i+1
-
+    
     print "ASCII DONE. FORCE ENDING 1"
     sys.exit(5)  
-
- #Deactivated renaming command     
-   # attachments=glob.glob("{0}/*/*".format(filepath))
-    if (len(attachments) > 0): # if any attachment with key embedded to name found
-        
-        # convert file names to ascii
-        if (1):
-            i=1
-            for item in attachments: # add them all
-                #jira.add_attachment(issue=IssueID, attachment=attachments[0])
-                print "*****************************************"
-                print "Attachment {0}:{1}".format(i,item)
-                regex = r"(\\)(\d\d\d)(_)(\d+)(\\)(.*)"
-                regex2=r"(.*?)(\\)(\d\d\d)(_)(\d+)(\\)(.*)"
-                
-                match = re.search(regex, item)
-                match2 = re.search(regex2, item)
-             
-                path=match2.group(1)+match2.group(2)+match2.group(3)+match2.group(4)+match2.group(5)
-                origname=match2.group(7)
-                print "Original name:{0}".format(origname)
-                #newname=unidecode.unidecode(u'{0}').format(origname)
-                
-                #newname=unidecode.unidecode(origname)
-                #newname=origname.encode('utf-8')
-                command="unidecode -c \"{0}\"".format(origname) # did not get working directly
-                print "Command WOULD BE: {0}".format(command)
-               # NOT newname=os.popen(command).read()
-                
-                
-                print "GOING TO DO UNIDECODING:{0} ---->  {1}".format(origname,newname)
-                print "New name:{0}".format(newname)
-                print "Path: {0}".format(path)
-                newfile=path+"\\"+newname
-                print "Newfile: {0}".format(newfile)
-                if (item==newfile):
-                    print "No need for ascii renaming"
-                else:
-                    new_item= item
-                    x=new_item.replace("\\","\\\\")
-                    y=newfile.replace("\\","\\\\")
-                    y=y.replace("\n","") #remove linefeed created somewhere earlier
-                    print "SHOULD-WOULD GOING TO DO RENAMING:{0} ---->{1}".format(x,y)
-                    # NOT  os.rename(x,y)
-                    print "Done!!!"
-                    print "-------------------------------------------------------------------"
-                i=i+1
-        else:
-            print "--> Renaming bypassed"
-
 
 
 
