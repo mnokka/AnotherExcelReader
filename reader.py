@@ -18,13 +18,13 @@ import sys, logging
 import argparse
 #import re
 from collections import defaultdict
-from CreateIssue import Authenticate  # no need to use as external command
-from CreateIssue import DoJIRAStuff, CreateSubTask
+from author import Authenticate  # no need to use as external command
+from author import DoJIRAStuff
 from CreateIssue import CreateIssue 
 import glob
 
  
-__version__ = "0.2.1394"
+__version__ = "0.1.1396"
 
 
 logging.basicConfig(level=logging.DEBUG) # IF calling from Groovy, this must be set logging level DEBUG in Groovy side order these to be written out

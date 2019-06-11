@@ -22,6 +22,8 @@ import itertools, re, sys
 from jira import JIRA
 import random
 
+from author import Authenticate  # no need to use as external command
+from author import DoJIRAStuff
 
 __version__ = "0.1"
 thisFile = __file__
@@ -35,6 +37,7 @@ def main(argv):
     JIRADESCRIPTION=""
     PSWD=''
     USER=''
+    jira=''
     
     parser = argparse.ArgumentParser(usage="""
     {1}    Version:{0}     -  mika.nokka1@gmail.com
@@ -54,7 +57,7 @@ def main(argv):
     parser.add_argument('-s','--summary', help='<JIRA issue summary>')
     parser.add_argument('-d','--description', help='<JIRA issue description>')
     
-    parser.add_argument('-ps','--password', help='<JIRA password>')
+    parser.add_argument('-x','--password', help='<JIRA password>')
     parser.add_argument('-u','--user', help='<JIRA user>')
     
     args = parser.parse_args()
@@ -70,8 +73,8 @@ def main(argv):
     JIRASUMMARY = args.summary or ''
     JIRADESCRIPTION = args.description or ''
   
-    PSWD= args.description or ''
-    USER= args.description or ''
+    PSWD= args.password or ''
+    USER= args.user or ''
   
     # quick old-school way to check needed parameters
     if (JIRASERVICE=='' or  JIRAPROJECT=='' or JIRASUMMARY=='' or PSWD=='' or USER==''):
@@ -81,54 +84,9 @@ def main(argv):
     user, PASSWORD = Authenticate(JIRASERVICE,PSWD,USER)
     jira= DoJIRAStuff(user,PASSWORD,JIRASERVICE)
     #CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,PSWD)
+    CreateSimpleIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION)
     
-####################################################################################################   
-# POC skips .netrc usage
-# 
-def Authenticate(JIRASERVICE,PSWD,USER):
-    host=JIRASERVICE
-    #credentials = netrc.netrc()
-    #auth = credentials.authenticators(host)
-    #if auth:
-    #    user = auth[0]
-    #    PASSWORD = auth[2]
-    #    print "Got .netrc OK"
-    #else:
-    #    print "ERROR: .netrc file problem (Server:{0} . EXITING!".format(host)
-    #    sys.exit(1)
-    user=USER
-    PASSWORD=PSWD
 
-    f = requests.get(host,auth=(user, PASSWORD))
-         
-    # CHECK WRONG AUTHENTICATION    
-    header=str(f.headers)
-    HeaderCheck = re.search( r"(.*?)(AUTHENTICATION_DENIED|AUTHENTICATION_FAILED)", header)
-    if HeaderCheck:
-        CurrentGroups=HeaderCheck.groups()    
-        print ("Group 1: %s" % CurrentGroups[0]) 
-        print ("Group 2: %s" % CurrentGroups[1]) 
-        print ("Header: %s" % header)         
-        print "Authentication FAILED - HEADER: {0}".format(header) 
-        print "--> ERROR: Apparantly user authentication gone wrong. EXITING!"
-        sys.exit(1)
-    else:
-        print "Authentication OK \nHEADER: {0}".format(header)    
-    print "---------------------------------------------------------"
-    return user,PASSWORD
-
-###################################################################################    
-def DoJIRAStuff(user,PASSWORD,JIRASERVICE):
- jira_server=JIRASERVICE
- try:
-     print("Connecting to JIRA: %s" % jira_server)
-     jira_options = {'server': jira_server}
-     jira = JIRA(options=jira_options,basic_auth=(user,PASSWORD))
-     print "JIRA Authorization OK"
- except Exception,e:
-    print("Failed to connect to JIRA: %s" % e)
- return jira   
-    
 ####################################################################################
 def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFOMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE,SYSTEMNUMBER):
     jiraobj=jira
@@ -237,6 +195,46 @@ def CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPO
         print("Failed to create JIRA object, error: %s" % e)
         sys.exit(1)
     return new_issue 
+
+########################################################################################
+# test creating issue with multiple selection list custom field
+def CreateSimpleIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION):
+    #jiraobj=jira
+    project=JIRAPROJECT
+    
+    
+    #lottery = random.randint(1,3)
+    #if (lottery==1):
+    #    TASKTYPE="Steal"
+    #elif (lottery>1):
+    #    TASKTYPE="Outfitting"
+    #else:
+    #    TASKTYPE="Task"
+    
+    #TASKTYPE="Hull Inspection NW"
+    TASKTYPE="Task"
+    
+    print "Creating issue for JIRA project: {0}".format(project)
+    
+
+    
+    issue_dict = {
+    'project': {'key': JIRAPROJECT},
+    'summary': str(JIRASUMMARY),
+    'description': str(JIRADESCRIPTION),
+    'issuetype': {'name': TASKTYPE},
+    'customfield_14600' : [{'value': str("cat")}] ,
+    }
+
+    try:
+        new_issue = jira.create_issue(fields=issue_dict)
+        print "Issue created OK"
+    except Exception,e:
+        print("Failed to create JIRA object, error: %s" % e)
+        sys.exit(1)
+    return new_issue 
+
+
 
         
 if __name__ == "__main__":
