@@ -223,7 +223,7 @@ def CreateSimpleIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION):
     'summary': str(JIRASUMMARY),
     'description': str(JIRADESCRIPTION),
     'issuetype': {'name': TASKTYPE},
-    'customfield_14600' : [{'value': str("cat")}] ,
+    'customfield_14600' : [{'value': str("cat")},{'value': str("bear")}] ,
     }
 
     try:
