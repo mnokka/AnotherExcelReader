@@ -161,17 +161,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
     AC=29 #Firezone NW
     
     
-    
-    
-    
-    
-    
-    
-   
 
-    
-    #for cell in CurrentSheet['A']:
-    #    logging.debug  ("Row value:{0}".format(cell.value))
   
     
     ##############################################################################################
@@ -187,11 +177,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             logging.debug("ROW:{0} Original ID:{1}".format(i,mycell.value))
             Issues[KEY]={} # add to dictionary as master key (KEY)
             
-            #Just hardocode operations, POC is one off
-            #LINKED_ISSUES=(CurrentSheet.cell(row=i, column=K).value) #NOTE THIS APPROACH GOES ALWAYS TO THE FIRST SHEET
-            #logging.debug("Attachment:{0}".format((CurrentSheet.cell(row=i, column=K).value))) # for the same row, show also column K (LINKED_ISSUES) values
-            #Issues[KEY]["LINKED_ISSUES"] = LINKED_ISSUES
-            
+            #Just hardocode operations, POC is one off (actually second time this tool variant is used......)
+
+           
             SUMMARY=(CurrentSheet.cell(row=i, column=C).value)
             if not SUMMARY:
                 SUMMARY="Summary for this task has not been defined"
@@ -200,20 +188,23 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             ISSUE_TYPE=(CurrentSheet.cell(row=i, column=D).value)
             Issues[KEY]["ISSUE_TYPE"] = ISSUE_TYPE
             
-            STATUS=(CurrentSheet.cell(row=i, column=E).value)
+            STATUSNW=(CurrentSheet.cell(row=i, column=E).value)
+            Issues[KEY]["STATUSNW"] = STATUSNW
+            
+            STATUS=(CurrentSheet.cell(row=i, column=G).value)
             Issues[KEY]["STATUS"] = STATUS
             
-            RESPONSIBLE=(CurrentSheet.cell(row=i, column=G).value)
-            Issues[KEY]["RESPONSIBLE"] = RESPONSIBLE.encode('utf-8')
+            PRIORITY=(CurrentSheet.cell(row=i, column=H).value)
+            Issues[KEY]["PRIORITY"] = PRIORITY.encode('utf-8')
             
-            #REPORTER=(CurrentSheet.cell(row=i, column=G).value)
-            #Issues[KEY]["REPORTER"] = REPORTER
+            RESPONSIBLENW=(CurrentSheet.cell(row=i, column=I).value)
+            Issues[KEY]["RESPONSIBLENW"] = RESPONSIBLENW
             
             
-            CREATOR=(CurrentSheet.cell(row=i, column=H).value)
-            Issues[KEY]["CREATOR"] = CREATOR
+            RESPONSIBLE=(CurrentSheet.cell(row=i, column=J).value)
+            Issues[KEY]["RESPONSIBLE"] = RESPONSIBLE
             
-            CREATED=(CurrentSheet.cell(row=i, column=I).value) #Inspection date
+            CREATED=(CurrentSheet.cell(row=i, column=K).value) #Inspection date
             # ISO 8601 conversion to Exceli time
             time2=CREATED.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
             print "CREATED ISOFORMAT TIME2:{0}".format(time2)
@@ -222,32 +213,43 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             Issues[KEY]["INSPECTED"] = INSPECTED
             
             
-            SHIP=(CurrentSheet.cell(row=i, column=M).value)
-            Issues[KEY]["SHIP"] = SHIP
+            SHIPNUMBER=(CurrentSheet.cell(row=i, column=L).value)
+            Issues[KEY]["SHIPNUMBER"] = SHIPNUMBER
             
-            PERFORMER=(CurrentSheet.cell(row=i, column=P).value)
-            Issues[KEY]["PERFORMER"] = PERFORMER.encode('utf-8')
+            #PERFORMER=(CurrentSheet.cell(row=i, column=P).value)
+            #Issues[KEY]["PERFORMER"] = PERFORMER.encode('utf-8')
             
               
             #RESPHONE=(CurrentSheet.cell(row=i, column=U).value)
             #Issues[KEY]["RESPHONE"] = RESPHONE
             
-            DEPARTMENT=(CurrentSheet.cell(row=i, column=S).value)
+            SHIPNUMBERNW=(CurrentSheet.cell(row=i, column=M).value)
+            Issues[KEY]["SHIPNUMBERNW"] = SHIPNUMBERNW
+            
+            SYSTEM=(CurrentSheet.cell(row=i, column=N).value)
+            Issues[KEY]["SYSTEM"] = SYSTEM
+            
+            DEPARTMENTNW=(CurrentSheet.cell(row=i, column=V).value)
+            Issues[KEY]["DEPARTMENTNW"] = DEPARTMENTNW
+            
+            DEPARTMENT=(CurrentSheet.cell(row=i, column=W).value)
             Issues[KEY]["DEPARTMENT"] = DEPARTMENT
             
-            DECK=(CurrentSheet.cell(row=i, column=V).value)
-            Issues[KEY]["DECK"] = DECK
-            
-            BLOCK=(CurrentSheet.cell(row=i, column=W).value)
-            Issues[KEY]["BLOCK"] = BLOCK
-            
-            FIREZONE=(CurrentSheet.cell(row=i, column=X).value)
-            Issues[KEY]["FIREZONE"] = FIREZONE
-            
                 
-            SYSTEMNUMBER=(CurrentSheet.cell(row=i, column=N).value)
-            Issues[KEY]["SYSTEMNUMBER"] = SYSTEMNUMBER
+            TOPOLOGY=(CurrentSheet.cell(row=i, column=X).value)
+            Issues[KEY]["TOPOLOGY"] = TOPOLOGY
             
+            SURVEYOR=(CurrentSheet.cell(row=i, column=Z).value)
+            Issues[KEY]["SURVEYOR"] = SURVEYOR
+            
+            DECKNW=(CurrentSheet.cell(row=i, column=AA).value)
+            Issues[KEY]["DECKNW"] = DECKNW
+            
+            BLOCKNW=(CurrentSheet.cell(row=i, column=AB).value)
+            Issues[KEY]["BLOCKNW"] = BLOCKNW
+            
+            FIREZONENW=(CurrentSheet.cell(row=i, column=AC).value)
+            Issues[KEY]["FIREZONENW"] = FIREZONENW
             
             
             
@@ -267,13 +269,18 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
     #for key, value in Issues.iteritems() :
     #    print key, value
 
+
+    print "EXITNG NOW!"
+    sys.exit(5)
+    
+
     ############################################################################################################################
     # Check any remarks (subtasks) for main issue
     # NOTE: Uses hardcoded sheet/column values
     #
     #removed currently dfue excel changes
 
-
+    
     print "THIS SHOULD HANDLE SUBTASKS"
     print "Subtasks file:{0}".format(subfilename)
 
