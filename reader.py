@@ -97,7 +97,7 @@ def main(argv):
 def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
     logging.debug ("Filepath: %s     Filename:%s" %(filepath ,filename))
     files=filepath+"/"+filename
-    logging.debug ("File:{0}".format(files))
+    logging.debug ("Excel (main issues) file:{0}".format(files))
    
     Issues=defaultdict(dict) 
 
@@ -113,9 +113,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
 
 
     #subtasks
-    logging.debug ("Filepath: %s     Filename:%s" %(filepath ,subfilename))
+    logging.debug ("Subtasks ---> Filepath: %s     Filename:%s" %(filepath ,subfilename))
     subfiles=filepath+"/"+subfilename
-    logging.debug ("SubFiles:{0}".format(subfiles))
+    logging.debug ("Subtasks file:{0}".format(subfiles))
    
     
     SubMainSheet="general_report" 
@@ -134,25 +134,34 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
     #CONFIGURATIONS AND EXCEL COLUMN MAPPINGS, both main and subtask excel
     DATASTARTSROW=5 # data section starting line MAIN TASKS EXCEL
     DATASTARTSROWSUB=5 # data section starting line SUB TASKS EXCEL
+    B=2 #Key (inspectionnumber NW)
     C=3 #SUMMARY
     D=4 #Issue Type
-    E=5 #Status Always "Open"    
-    G=7 #ResponsibleNW
-    H=8 #Creator
-    I=9 #Inspection date --> Original Created date in Jira Changed as Inspection Date
-    J=10 # Subtask TASK-ID
-    K=11 #system number, subtasks excel 
-    M=13 #Shipnumber
-    N=14 #system number
-    P=16 #PerformerNW
-    Q=17 #Performer, subtask excel
-    R=18 #Responsible ,subtask excel
+    E=5 #Status NW (orginal status)  
+    G=7 #Status(manually mapped stastus to current system)
+    H=8 # Priority
+    I=9 #  Responsible NW (orignal Responsible)
+    J=10 # Responsbile as a Jira user
+    K=11 #Inspection date, format: 1.11.2018  0:00:00    system number, subtasks excel   
+    L=12 #ShipNumber 
+    M=13 #System Number NW (original one)
+    N=14 #System   can be not set
+    # P=16 #PerformerNW
+    #Q=17 #Performer, subtask excel
+    #R=18 #Responsible ,subtask excel
     #U=20 #Responsible Phone Number --> Not taken, field just exists in Jira
-    S=19 #DepartmentNW
-    V=22 #Deck
-    W=23 #Block
-    X=24 # Firezone
-    AA=27 #Subtask DeckNW
+    #S=19 #DepartmentNW
+    V=22 #DepartmentNW  (original)
+    W=23 #Dpartment 
+    X=24 # Topology  --> add to description
+    Y=25 # Area
+    Z=26 #Surveyor
+    AA=27 #DeckNW
+    AB=28 #Block NW
+    AC=29 #Firezone NW
+    
+    
+    
     
     
     
