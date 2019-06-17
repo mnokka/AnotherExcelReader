@@ -22,6 +22,7 @@ from author import Authenticate  # no need to use as external command
 from author import DoJIRAStuff
 from CreateIssue import CreateIssue 
 import glob
+import json # for json dumo
 
  
 __version__ = "0.1.1396"
@@ -132,27 +133,48 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
 
     ########################################
     #CONFIGURATIONS AND EXCEL COLUMN MAPPINGS, both main and subtask excel
+    # If now subtask description, it is sma as main task one (excample C column)
     DATASTARTSROW=5 # data section starting line MAIN TASKS EXCEL
     DATASTARTSROWSUB=5 # data section starting line SUB TASKS EXCEL
     B=2 #Key (inspectionnumber NW)
+    SUB_B=2 
     C=3 #SUMMARY
-    D=4 #Issue Type
-    E=5 #Status NW (orginal status)  
-    G=7 #Status(manually mapped stastus to current system)
+    SUB_C=3
+    D=4 #Issue Type NW (oroginal)
+    SUB_D=4
+    E=5 #Issue Type
+    SUB_E=5
+    F=6 #Status NW (orginal status) 
+    SUB_F=6
+    G=7 #Status(manually mapped status to current system)
+    SUB_G=7
     H=8 # Priority
+    SUB_H=8 #REporter NW
     I=9 #  Responsible NW (orignal Responsible)
+    SUB_I=9 # Created
     J=10 # Responsbile as a Jira user
+    SUB_J=10 # Description
     K=11 #Inspection date, format: 1.11.2018  0:00:00    system number, subtasks excel   
     L=12 #ShipNumber 
+    SUB_L=12
     M=13 #System Number NW (original one)
+    SUB_M=13
     N=14 #System   can be not set
+    SUB_N=14 #Performer
+    SUB_O=15 #Responsible NW
+    SUB_P=16 #Assignee (jira username)
+    Q=17 #Performer NW
     # P=16 #PerformerNW
     #Q=17 #Performer, subtask excel
     #R=18 #Responsible ,subtask excel
     #U=20 #Responsible Phone Number --> Not taken, field just exists in Jira
-    #S=19 #DepartmentNW
+    SUB_S=19  #Ijnspection Data and Time
+    SUB_T=20 # DepartmentNW
+    SUB_U=21 #Department 
     V=22 #DepartmentNW  (original)
-    W=23 #Dpartment 
+    SUB_V=22 #Block NW
+    W=23 #Department 
+    SUB_W=23 # Deck NW
     X=24 # Topology  --> add to description
     Y=25 # Area
     Z=26 #Surveyor
@@ -171,10 +193,13 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
     # NOTE: As this handles first sheet, using used row/cell reading (buggy, works only for first sheet) 
     #
     i=DATASTARTSROW # brute force row indexing
-    for row in CurrentSheet[('B{}:B{}'.format(DATASTARTSROW,CurrentSheet.max_row))]:  # go trough all column B (KEY) rows
+    ENDROW=(CurrentSheet.max_row) # to prvent off-by-one in the end of sheet, also excel needs deleting of empty end line1
+    #print "ENDROW:{0}".format(ENDROW)
+    #sys.exit(1)
+    for row in CurrentSheet[('B{}:B{}'.format(DATASTARTSROW,ENDROW))]:  # go trough all column B (KEY) rows
         for mycell in row:
             KEY=mycell.value
-            logging.debug("ROW:{0} Original ID:{1}".format(i,mycell.value))
+            #logging.debug("ROW:{0} Original ID:{1}".format(i,mycell.value))
             Issues[KEY]={} # add to dictionary as master key (KEY)
             
             #Just hardocode operations, POC is one off (actually second time this tool variant is used......)
@@ -185,17 +210,24 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
                 SUMMARY="Summary for this task has not been defined"
             Issues[KEY]["SUMMARY"] = SUMMARY
             
-            ISSUE_TYPE=(CurrentSheet.cell(row=i, column=D).value)
+            ISSUE_TYPENW=(CurrentSheet.cell(row=i, column=D).value)
+            Issues[KEY]["ISSUE_TYPENW"] = ISSUE_TYPENW
+            
+            ISSUE_TYPE=(CurrentSheet.cell(row=i, column=E).value)
             Issues[KEY]["ISSUE_TYPE"] = ISSUE_TYPE
             
-            STATUSNW=(CurrentSheet.cell(row=i, column=E).value)
+            STATUSNW=(CurrentSheet.cell(row=i, column=F).value)
             Issues[KEY]["STATUSNW"] = STATUSNW
+            
+          
             
             STATUS=(CurrentSheet.cell(row=i, column=G).value)
             Issues[KEY]["STATUS"] = STATUS
             
             PRIORITY=(CurrentSheet.cell(row=i, column=H).value)
-            Issues[KEY]["PRIORITY"] = PRIORITY.encode('utf-8')
+            if not PRIORITY:
+                SUMMARY="Major"  # force set, all should be major
+            Issues[KEY]["PRIORITY"] = PRIORITY
             
             RESPONSIBLENW=(CurrentSheet.cell(row=i, column=I).value)
             Issues[KEY]["RESPONSIBLENW"] = RESPONSIBLENW
@@ -207,7 +239,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             CREATED=(CurrentSheet.cell(row=i, column=K).value) #Inspection date
             # ISO 8601 conversion to Exceli time
             time2=CREATED.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
-            print "CREATED ISOFORMAT TIME2:{0}".format(time2)
+            #print "Original date format:{0}".format(CREATED)
+            #print "CREATED ISOFORMAT TIME2:{0}".format(time2)
             CREATED=time2
             INSPECTED=CREATED # just reusing value
             Issues[KEY]["INSPECTED"] = INSPECTED
@@ -229,6 +262,10 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             SYSTEM=(CurrentSheet.cell(row=i, column=N).value)
             Issues[KEY]["SYSTEM"] = SYSTEM
             
+            
+            PERFORMERNW=(CurrentSheet.cell(row=i, column=Q).value)
+            Issues[KEY]["PERFORMERNW"] = PERFORMERNW
+            
             DEPARTMENTNW=(CurrentSheet.cell(row=i, column=V).value)
             Issues[KEY]["DEPARTMENTNW"] = DEPARTMENTNW
             
@@ -238,6 +275,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
                 
             TOPOLOGY=(CurrentSheet.cell(row=i, column=X).value)
             Issues[KEY]["TOPOLOGY"] = TOPOLOGY
+            
+            AREA=(CurrentSheet.cell(row=i, column=Y).value)
+            Issues[KEY]["AREA"] = AREA
             
             SURVEYOR=(CurrentSheet.cell(row=i, column=Z).value)
             Issues[KEY]["SURVEYOR"] = SURVEYOR
@@ -256,10 +296,13 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             #Create sub dictionary for possible subtasks (to be used later)
             Issues[KEY]["REMARKS"]={}
             
-            logging.debug("---------------------------------------------------")
+            #logging.debug("---------------------------------------------------")
             i=i+1
     #print Issues
-    print Issues.items() 
+    #print Issues.items() 
+    
+    #print(json.dumps(Issues, indent=4, sort_keys=True))
+    
     
     #key=18503 # check if this key exists
     #if key in Issues:
@@ -270,8 +313,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
     #    print key, value
 
 
-    print "EXITNG NOW!"
-    sys.exit(5)
+   # print "EXITNG NOW!"
+    #sys.exit(5)
     
 
     ############################################################################################################################
@@ -293,62 +336,97 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             #Issues[KEY]={} # add to dictionary as master key (KEY)
             
             #Just hardocode operations, POC is one off
-            #LINKED_ISSUES=(CurrentSheet.cell(row=i, column=K).value) #NOTE THIS APPROACH GOES ALWAYS TO THE FIRST SHEET
-            #logging.debug("Attachment:{0}".format((CurrentSheet.cell(row=i, column=K).value))) # for the same row, show also column K (LINKED_ISSUES) values
-            #Issues[KEY]["LINKED_ISSUES"] = LINKED_ISSUES
+
             if PARENTKEY in Issues:
                 print "Subtask has a known parent {0}".format(PARENTKEY)
                 #REMARKKEY=SubCurrentSheet['J{0}'.format(i)].value  # column J holds Task-ID NW
                 REMARKKEY=(SubCurrentSheet.cell(row=i, column=J).value)
-                print "REMARKKEY:{0}".format(REMARKKEY)
+                #print "REMARKKEY:{0}".format(REMARKKEY)
                 #Issues[KEY]["REMARKS"]={}
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY] = {}
                 
                 
                 # Just hardcode operattions, POC is one off
                 #DECK=SubCurrentSheet['AA{0}'.format(i)].value  # column AA holds DECK
-                SUBDECK=(SubCurrentSheet.cell(row=i, column=AA).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DECK"] = SUBDECK
-                
-                SUBBLOCK=(SubCurrentSheet.cell(row=i, column=X).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["BLOCK"] = SUBBLOCK
-                
-                SUBPERFORMER=(SubCurrentSheet.cell(row=i, column=Q).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["PERFORMER"] = SUBPERFORMER
-                
-                SUBRESPONSIBLE=(SubCurrentSheet.cell(row=i, column=R).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["RESPONSIBLE"] = SUBRESPONSIBLE
-                
-                SUBDEPARTMENT=(SubCurrentSheet.cell(row=i, column=W).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DEPARTMENT"] = SUBDEPARTMENT
-                
-                SUBISSUETYPE=(SubCurrentSheet.cell(row=i, column=D).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["ISSUETYPE"] = SUBISSUETYPE
-                
-                SUBSYSTEMNUMBER=(SubCurrentSheet.cell(row=i, column=N).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SYSTEMNUMBER"] = SUBSYSTEMNUMBER
-                
-                SUBSUMMARY=(SubCurrentSheet.cell(row=i, column=C).value)
-                if not SUBSUMMARY:
-                    SUBSUMMARY="Summary for this subtask has not been defined"
+                SUBSUMMARY=(SubCurrentSheet.cell(row=i, column=SUB_C).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUMMARY"] = SUBSUMMARY
                 
-                SUBCREATED=(SubCurrentSheet.cell(row=i, column=I).value) #Inspection date
+                SUBISSUE_TYPENW=(SubCurrentSheet.cell(row=i, column=SUB_D).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["ISSUE_TYPENW"] = SUBISSUE_TYPENW
+                
+                SUBISSUE_TYPE=(SubCurrentSheet.cell(row=i, column=SUB_E).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["ISSUE_TYPE"] = SUBISSUE_TYPE
+                
+                SUBSTATUSNW=(SubCurrentSheet.cell(row=i, column=SUB_F).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["STATUSNW"] = SUBSTATUSNW
+                
+                SUBSTATUS=(SubCurrentSheet.cell(row=i, column=SUB_G).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["STATUSNW"] = SUBSTATUS
+                
+                
+                SUBREPORTERNW=(SubCurrentSheet.cell(row=i, column=SUB_H).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["REPORTERNW"] = SUBREPORTERNW
+                
+                SUBCREATED=(SubCurrentSheet.cell(row=i, column=SUB_I).value) #Inspection date
                 # ISO 8601 conversion to Exceli time
                 subtime2=SUBCREATED.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
                 print "CREATED SUBTASK ISOFORMAT TIME2:{0}".format(subtime2)
                 SUBCREATED=subtime2
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUBCREATED"] = SUBCREATED
                 
-                JIRASUBDESCRIPTION="Remark for Inspection Report"
-                SUBTASKID=REMARKKEY
+                SUBDESCRIPTION=(SubCurrentSheet.cell(row=i, column=SUB_J).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DESCRIPTION"] = SUBDESCRIPTION
+                
+                SUBSHIPNUMBER=(SubCurrentSheet.cell(row=i, column=SUB_L).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SHIPNUMBER"] = SUBSHIPNUMBER
+                
+                SUBSYSTEMNUMBERNW=(SubCurrentSheet.cell(row=i, column=SUB_M).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SYSTEMNUMBERNW"] = SUBSYSTEMNUMBERNW
+                
+                SUBPERFORMER=(SubCurrentSheet.cell(row=i, column=SUB_N).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["PERFORMER"] = SUBPERFORMER
+                
+                SUBRESPONSIBLENW=(SubCurrentSheet.cell(row=i, column=SUB_O).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["RESPONSIBLENW"] = SUBRESPONSIBLENW
+                
+                SUBASSIGNEE=(SubCurrentSheet.cell(row=i, column=SUB_P).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["ASSIGNEE"] = SUBASSIGNEE
+           
+                #SUBINSPECTION=(SubCurrentSheet.cell(row=i, column=SUB_S).value)
+                #ISO 8601 conversion to Exceli time
+                #SUBINSPECTION=SUBINSPECTION.to_datetime(SUBINSPECTION)
+                #subtime3=SUBINSPECTION.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
+                #subtime3=SUBINSPECTION.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
+                
+                #print "CREATED SUBTASK ISOFORMAT TIME3:{0}".format(subtime3)
+                #SUBINSPECTION=subtime3
+                #Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUBINSPECTION"] = SUBINSPECTION
+           
+           
+                SUBDEPARTMENTNW=(SubCurrentSheet.cell(row=i, column=SUB_T).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DEPARTMENTNW"] = SUBDEPARTMENTNW
+                
+                SUBDEPARTMENT=(SubCurrentSheet.cell(row=i, column=SUB_U).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DEPARTMENT"] = SUBDEPARTMENT
+                
+                
+                SUBBLOCKNW=(SubCurrentSheet.cell(row=i, column=SUB_V).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["BLOCKNW"] = SUBBLOCKNW
+                
+                SUBDECKNW=(SubCurrentSheet.cell(row=i, column=SUB_W).value)
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DECKNW"] = SUBDECKNW
+           
+             
+                #SUBTASKID=REMARKKEY
             
             else:
                     print "ERROR: Unknown parent found"
             print "----------------------------------"
             i=i+1
     
-
+    print(json.dumps(Issues, indent=4, sort_keys=True))
+    print "EXITING"
+    sys.exit(5)
 
     ##########################################################################################################################
     
