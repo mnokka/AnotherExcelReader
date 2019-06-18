@@ -6,10 +6,8 @@
 # 
 #
 #
-# Author mika.nokka1@gmail.com for Ambientia
+# Author mika.nokka1@gmail.com 
 #
-# TODO 
-# Use Pandas instead?
 #
 #from __future__ import unicode_literals
 
@@ -61,6 +59,7 @@ def main(argv):
     parser.add_argument('-s','--service', help='<JIRA service>')
     parser.add_argument('-p','--project', help='<JIRA project>')
    
+    parser.add_argument('-a','--attachemnts', help='<Attachment directory>')
         
     args = parser.parse_args()
     
@@ -76,15 +75,16 @@ def main(argv):
     JIRAPROJECT = args.project or ''
     PSWD= args.password or ''
     USER= args.user or ''
+    ATTACHDIR=args.attachemnts or ''
     
     # quick old-school way to check needed parameters
-    if (filepath=='' or  filename=='' or JIRASERVICE=='' or  JIRAPROJECT==''  or PSWD=='' or USER=='' or subfilename==''):
+    if (filepath=='' or  filename=='' or JIRASERVICE=='' or  JIRAPROJECT==''  or PSWD=='' or USER=='' or subfilename=='' or ATTACHDIR=='' ):
         parser.print_help()
         sys.exit(2)
         
 
 
-    Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename)
+    Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTACHDIR)
 
 
 ############################################################################################################################################
@@ -95,7 +95,7 @@ def main(argv):
 #  
 #NOTE: Uses hardcoded sheet/column value
 
-def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
+def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTACHDIR):
     logging.debug ("Filepath: %s     Filename:%s" %(filepath ,filename))
     files=filepath+"/"+filename
     logging.debug ("Excel (main issues) file:{0}".format(files))
@@ -305,6 +305,10 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             
             #logging.debug("---------------------------------------------------")
             i=i+1
+            
+            key=KEY
+            HandleAttachemnts(filepath,key,ATTACHDIR)
+            
     #print Issues
     #print Issues.items() 
     
@@ -377,7 +381,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
                 SUBCREATED=(SubCurrentSheet.cell(row=i, column=SUB_I).value) #Inspection date
                 # ISO 8601 conversion to Exceli time
                 subtime2=SUBCREATED.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
-                print "CREATED SUBTASK ISOFORMAT TIME2:{0}".format(subtime2)
+                #print "CREATED SUBTASK ISOFORMAT TIME2:{0}".format(subtime2)
                 SUBCREATED=subtime2
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUBCREATED"] = SUBCREATED
                 
@@ -427,11 +431,16 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
                 #SUBTASKID=REMARKKEY
             
             else:
-                    print "ERROR: Unknown parent found"
+                    print "ERROR: Unknown parent found --> originazl key: {0}".format(PARENTKEY)
             print "----------------------------------"
             i=i+1
     
-    print(json.dumps(Issues, indent=4, sort_keys=True))
+    
+ 
+    #print(json.dumps(Issues, indent=4, sort_keys=True))
+    
+    
+    
     print "EXITING"
     sys.exit(5)
 
@@ -439,6 +448,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
     
     
     
+  
+    
+        
     Authenticate(JIRASERVICE,PSWD,USER)
     jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
 
@@ -544,8 +556,22 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             
         print "*************************************************************************"
         
+#############################################################################
 
- 
+def HandleAttachemnts(filepath,key,ATTACHDIR):
+        filesx=filepath+"/*{0}*".format(key)
+        print "filesx:{0}".format(filesx)
+        
+        
+        attachments=glob.glob("{0}".format(filesx))
+        if (len(attachments) > 0): # if any attachment with key embedded to name found
+            print "Found attachments for key:{0}".format(IssueID)
+            print "Found these:{0}".format(attachments)
+            for item in attachments: # add them all
+                jira.add_attachment(issue=IssueID, attachment=attachments[0])
+                print "Attachment:{0} added".format(item)
+        else:
+            print "NO attachments  found for original key:{0}".format(key)
   
 
     
