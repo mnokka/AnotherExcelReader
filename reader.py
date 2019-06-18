@@ -277,7 +277,11 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
             
                 
             TOPOLOGY=(CurrentSheet.cell(row=i, column=X).value)
+            if TOPOLOGY:
+                DESCRIPTION="Topology ---->  "+TOPOLOGY
+            Issues[KEY]["DESCRIPTION"] = DESCRIPTION    
             Issues[KEY]["TOPOLOGY"] = TOPOLOGY
+            
             
             AREA=(CurrentSheet.cell(row=i, column=Y).value)
             Issues[KEY]["AREA"] = AREA
