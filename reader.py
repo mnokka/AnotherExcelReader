@@ -154,27 +154,30 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
     SUB_I=9 # Created
     J=10 # Responsbile as a Jira user
     SUB_J=10 # Description
-    K=11 #Inspection date, format: 1.11.2018  0:00:00    system number, subtasks excel   
+    K=11 #Inspection date, format: 1.11.2018  0:00:00    system number, subtasks excel
+    SUB_K=11 # Ship Number   
     L=12 #ShipNumber 
-    SUB_L=12
+    SUB_L=12 #System Number NW
     M=13 #System Number NW (original one)
-    SUB_M=13
+    SUB_M=13 #Performer
     N=14 #System   can be not set
-    SUB_N=14 #Performer
-    SUB_O=15 #Responsible NW
-    SUB_P=16 #Assignee (jira username)
+    SUB_N=14 #Responsible NW
+    SUB_O=15 #Assignee (jira username)
+    #SUB_P=16 #Assignee (jira username)
     Q=17 #Performer NW
     # P=16 #PerformerNW
     #Q=17 #Performer, subtask excel
     #R=18 #Responsible ,subtask excel
     #U=20 #Responsible Phone Number --> Not taken, field just exists in Jira
-    SUB_S=19  #Ijnspection Data and Time
-    SUB_T=20 # DepartmentNW
-    SUB_U=21 #Department 
+    
+    SUB_R=18  #Ijnspection Data and Time
+    SUB_S=19  #Department NW
+    SUB_T=20 # Department
+    SUB_U=21 #BlockNW
     V=22 #DepartmentNW  (original)
-    SUB_V=22 #Block NW
+    SUB_V=22 #Deck NW
     W=23 #Department 
-    SUB_W=23 # Deck NW
+    #SUB_W=23 # Deck NW
     X=24 # Topology  --> add to description
     Y=25 # Area
     Z=26 #Surveyor
@@ -361,7 +364,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["STATUSNW"] = SUBSTATUSNW
                 
                 SUBSTATUS=(SubCurrentSheet.cell(row=i, column=SUB_G).value)
-                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["STATUSNW"] = SUBSTATUS
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["STATUS"] = SUBSTATUS
                 
                 
                 SUBREPORTERNW=(SubCurrentSheet.cell(row=i, column=SUB_H).value)
@@ -377,43 +380,43 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename):
                 SUBDESCRIPTION=(SubCurrentSheet.cell(row=i, column=SUB_J).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DESCRIPTION"] = SUBDESCRIPTION
                 
-                SUBSHIPNUMBER=(SubCurrentSheet.cell(row=i, column=SUB_L).value)
+                SUBSHIPNUMBER=(SubCurrentSheet.cell(row=i, column=SUB_K).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SHIPNUMBER"] = SUBSHIPNUMBER
                 
-                SUBSYSTEMNUMBERNW=(SubCurrentSheet.cell(row=i, column=SUB_M).value)
+                SUBSYSTEMNUMBERNW=(SubCurrentSheet.cell(row=i, column=SUB_L).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SYSTEMNUMBERNW"] = SUBSYSTEMNUMBERNW
                 
-                SUBPERFORMER=(SubCurrentSheet.cell(row=i, column=SUB_N).value)
+                SUBPERFORMER=(SubCurrentSheet.cell(row=i, column=SUB_M).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["PERFORMER"] = SUBPERFORMER
                 
-                SUBRESPONSIBLENW=(SubCurrentSheet.cell(row=i, column=SUB_O).value)
+                SUBRESPONSIBLENW=(SubCurrentSheet.cell(row=i, column=SUB_N).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["RESPONSIBLENW"] = SUBRESPONSIBLENW
                 
-                SUBASSIGNEE=(SubCurrentSheet.cell(row=i, column=SUB_P).value)
+                SUBASSIGNEE=(SubCurrentSheet.cell(row=i, column=SUB_O).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["ASSIGNEE"] = SUBASSIGNEE
            
-                #SUBINSPECTION=(SubCurrentSheet.cell(row=i, column=SUB_S).value)
+                SUBINSPECTION=(SubCurrentSheet.cell(row=i, column=SUB_R).value)
                 #ISO 8601 conversion to Exceli time
                 #SUBINSPECTION=SUBINSPECTION.to_datetime(SUBINSPECTION)
-                #subtime3=SUBINSPECTION.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
+                subtime3=SUBINSPECTION.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
                 #subtime3=SUBINSPECTION.strftime("%Y-%m-%dT%H:%M:%S.000-0300")  #-0300 is UTC delta to Finland, 000 just keeps Jira happy
                 
                 #print "CREATED SUBTASK ISOFORMAT TIME3:{0}".format(subtime3)
-                #SUBINSPECTION=subtime3
-                #Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUBINSPECTION"] = SUBINSPECTION
+                SUBINSPECTION=subtime3
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUBINSPECTION"] = SUBINSPECTION
            
            
-                SUBDEPARTMENTNW=(SubCurrentSheet.cell(row=i, column=SUB_T).value)
+                SUBDEPARTMENTNW=(SubCurrentSheet.cell(row=i, column=SUB_S).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DEPARTMENTNW"] = SUBDEPARTMENTNW
                 
-                SUBDEPARTMENT=(SubCurrentSheet.cell(row=i, column=SUB_U).value)
+                SUBDEPARTMENT=(SubCurrentSheet.cell(row=i, column=SUB_T).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DEPARTMENT"] = SUBDEPARTMENT
                 
                 
-                SUBBLOCKNW=(SubCurrentSheet.cell(row=i, column=SUB_V).value)
+                SUBBLOCKNW=(SubCurrentSheet.cell(row=i, column=SUB_U).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["BLOCKNW"] = SUBBLOCKNW
                 
-                SUBDECKNW=(SubCurrentSheet.cell(row=i, column=SUB_W).value)
+                SUBDECKNW=(SubCurrentSheet.cell(row=i, column=SUB_V).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DECKNW"] = SUBDECKNW
            
              
