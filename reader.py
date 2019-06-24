@@ -26,7 +26,7 @@ import json # for json dumo
 __version__ = "0.1.1396"
 
 
-logging.basicConfig(level=logging.DEBUG) # IF calling from Groovy, this must be set logging level DEBUG in Groovy side order these to be written out
+logging.basicConfig(level=logging.INFO) # IF calling from Groovy, this must be set logging level DEBUG in Groovy side order these to be written out
 
 
 
@@ -307,7 +307,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             i=i+1
             
             key=KEY
-            HandleAttachemnts(filepath,key,ATTACHDIR)
+            #HandleAttachemnts(filepath,key,ATTACHDIR)
             
     #print Issues
     #print Issues.items() 
@@ -335,7 +335,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     #removed currently dfue excel changes
 
     
-    print "THIS SHOULD HANDLE SUBTASKS"
+    print "Checking all subtasks now"
     print "Subtasks file:{0}".format(subfilename)
 
     
@@ -349,7 +349,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             #Just hardocode operations, POC is one off
 
             if PARENTKEY in Issues:
-                print "Subtask has a known parent {0}".format(PARENTKEY)
+                logging.debug( "Subtask has a known parent {0}".format(PARENTKEY))
                 #REMARKKEY=SubCurrentSheet['J{0}'.format(i)].value  # column J holds Task-ID NW
                 REMARKKEY=(SubCurrentSheet.cell(row=i, column=J).value)
                 #print "REMARKKEY:{0}".format(REMARKKEY)
@@ -432,16 +432,16 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             
             else:
                     print "ERROR: Unknown parent found --> originazl key: {0}".format(PARENTKEY)
-            print "----------------------------------"
+            logging.debug( "---------------------------------------------------------------------------")
             i=i+1
     
     
  
-    #print(json.dumps(Issues, indent=4, sort_keys=True))
+    print(json.dumps(Issues, indent=4, sort_keys=True))
     
     
     
-    print "EXITING"
+    print "EXITING NOW ALL DONE"
     sys.exit(5)
 
     ##########################################################################################################################
@@ -559,20 +559,20 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
 #############################################################################
 
 def HandleAttachemnts(filepath,key,ATTACHDIR):
-        filesx=filepath+"/*{0}*".format(key)
+        filesx=ATTACHDIR+"/*{0}*".format(key)
         print "filesx:{0}".format(filesx)
         
         
         attachments=glob.glob("{0}".format(filesx))
         if (len(attachments) > 0): # if any attachment with key embedded to name found
-            print "Found attachments for key:{0}".format(IssueID)
+            print "===> Found attachments for key:{0}".format(key)
             print "Found these:{0}".format(attachments)
-            for item in attachments: # add them all
-                jira.add_attachment(issue=IssueID, attachment=attachments[0])
-                print "Attachment:{0} added".format(item)
+            #for item in attachments: # add them all
+            #    jira.add_attachment(issue=IssueID, attachment=attachments[0])
+            #    print "Attachment:{0} added".format(item)
         else:
             print "NO attachments  found for original key:{0}".format(key)
-  
+        print "******************************************************************************************************************"
 
     
 logging.debug ("--Python exiting--")
