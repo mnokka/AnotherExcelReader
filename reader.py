@@ -21,6 +21,7 @@ from author import DoJIRAStuff
 from CreateIssue import CreateIssue 
 import glob
 import json # for json dumo
+from sqlalchemy.sql.expression import false
 
  
 __version__ = "0.1.1396"
@@ -96,6 +97,11 @@ def main(argv):
 #NOTE: Uses hardcoded sheet/column value
 
 def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTACHDIR):
+    
+    #false skips issue creation and other jira operations
+    PROD=False
+    
+    
     logging.debug ("Filepath: %s     Filename:%s" %(filepath ,filename))
     files=filepath+"/"+filename
     logging.debug ("Excel (main issues) file:{0}".format(files))
@@ -440,19 +446,20 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     print(json.dumps(Issues, indent=4, sort_keys=True))
     
     
-    
-    print "EXITING NOW ALL DONE"
-    sys.exit(5)
+
+    #print "EXITING NOW ALL DONE"
+    #sys.exit(5)
 
     ##########################################################################################################################
-    
+    # Create main issues
     
     
   
     
-        
-    Authenticate(JIRASERVICE,PSWD,USER)
-    jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
+    
+    if (PROD==True):    
+        Authenticate(JIRASERVICE,PSWD,USER)
+        jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
 
     #create main issues
     for key, value in Issues.iteritems() :
@@ -463,18 +470,18 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         print "4)SUMMARY:{0}".format((Issues[key]["SUMMARY"]).encode('utf-8'))
         print "5)ISSUE_TYPE:{0}".format((Issues[key]["ISSUE_TYPE"]).encode('utf-8'))    
         print "6)STATUS:{0}".format(Issues[key]["STATUS"])  
-        print "7)CREATOR:{0}".format(Issues[key]["CREATOR"])  
-        print "8)INSPECTED:{0}".format(Issues[key]["INSPECTED"]) 
-        print "9)SHIP:{0}".format(Issues[key]["SHIP"]) 
-        print "10)PERFORMER:{0}".format(Issues[key]["PERFORMER"]) #.encode('utf8'))    
+        #print "7)CREATOR:{0}".format(Issues[key]["CREATOR"])  
+        #print "8)INSPECTED:{0}".format(Issues[key]["INSPECTED"]) 
+        print "9)SHIP:{0}".format(Issues[key]["SHIPNUMBER"]) 
+        #print "10)PERFORMER:{0}".format(Issues[key]["PERFORMER"]) #.encode('utf8'))    
         print "11)RESPONSIBLE:{0}".format(Issues[key]["RESPONSIBLE"]) #.encode('utf8'))         
         #print "12)RESPHONE:{0}".format(Issues[key]["RESPHONE"])     
-        print "13)DEPARTMENT:{0}".format(Issues[key]["DEPARTMENT"])      
-        print "14)BLOCK:{0}".format(Issues[key]["BLOCK"])     
+        #print "13)DEPARTMENT:{0}".format(Issues[key]["DEPARTMENT"])      
+        #print "14)BLOCK:{0}".format(Issues[key]["BLOCK"])     
         #print "15)CRONO:{0}".format(Issues[key]["CRONO"])          
-        print "16)DECK:{0}".format(Issues[key]["DECK"])      
-        print "16)FIREZONE:{0}".format(Issues[key]["FIREZONE"])
-        print "17)SYSTEMNUMBER:{0}".format(Issues[key]["SYSTEMNUMBER"])
+        #print "16)DECK:{0}".format(Issues[key]["DECK"])      
+        #print "16)FIREZONE:{0}".format(Issues[key]["FIREZONE"])
+        #print "17)SYSTEMNUMBER:{0}".format(Issues[key]["SYSTEMNUMBER"])
    
         JIRADESCRIPTION="Inspection Report"
         JIRASUMMARY=(Issues[key]["SUMMARY"]).encode('utf-8')          
@@ -482,46 +489,51 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         JIRASUMMARY=JIRASUMMARY[:254] ## summary max length is 255
         KEY=key
         #REPORTER=Issues[key]["REPORTER"]
-        CREATOR=Issues[key]["CREATOR"]
-        INSPECTED=Issues[key]["INSPECTED"] # 30.1.2018  9:32:15 fromat from excel
-        SHIP=Issues[key]["SHIP"]
-        RESPONSIBLE=Issues[key]["RESPONSIBLE"]
-        PERFORMER=Issues[key]["PERFORMER"]
-        BLOCK=Issues[key]["BLOCK"]
-        DEPARTMENT=Issues[key]["DEPARTMENT"]
-        DECK=Issues[key]["DECK"]
+        #CREATOR=Issues[key]["CREATOR"]
+        #INSPECTED=Issues[key]["INSPECTED"] # 30.1.2018  9:32:15 fromat from excel
+        #SHIP=Issues[key]["SHIPNUMBER"]
+        #RESPONSIBLE=Issues[key]["RESPONSIBLE"]
+        #PERFORMER=Issues[key]["PERFORMER"]
+        #BLOCK=Issues[key]["BLOCK"]
+        #DEPARTMENT=Issues[key]["DEPARTMENT"]
+        #DECK=Issues[key]["DECK"]
         #DECK=DECK.encode('utf-8') # from June 2018 first real import (change in the excel format) 
-        DECK=DECK 
-        ISSUETYPE=Issues[key]["ISSUE_TYPE"]
-        SYSTEMNUMBER=Issues[key]["SYSTEMNUMBER"]
+        #DECK=DECK 
+        #ISSUETYPE=Issues[key]["ISSUE_TYPE"]
+        #SYSTEMNUMBER=Issues[key]["SYSTEMNUMBER"]
         
     
 
         
-        #print "--> SKIPPED ISSUE CREATION"
+        
         #IssueID="SHIP-1826" #temp ID
-        IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE,SYSTEMNUMBER)
-        print "Issue:{0}".format(IssueID)
-        #print "IssueKey:{0}".format(IssueID.key)
+        if (PROD==True):
+            IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE,SYSTEMNUMBER)
+            print "Issue:{0}".format(IssueID)
+            #print "IssueKey:{0}".format(IssueID.key)
+        else:
+           print "--> SKIPPED ISSUE CREATION" 
         
         filesx=filepath+"/*{0}*".format(key)
         print "filesx:{0}".format(filesx)
         
         
-        attachments=glob.glob("{0}".format(filesx))
-        if (len(attachments) > 0): # if any attachment with key embedded to name found
-            print "Found attachments for key:{0}".format(IssueID)
-            print "Found these:{0}".format(attachments)
-            for item in attachments: # add them all
-                jira.add_attachment(issue=IssueID, attachment=attachments[0])
-                print "Attachment:{0} added".format(item)
-        else:
-            print "NO attachments  found for key:{0}".format(IssueID)
+        if (PROD==True):
+            attachments=glob.glob("{0}".format(filesx))
+            if (len(attachments) > 0): # if any attachment with key embedded to name found
+                print "Found attachments for key:{0}".format(IssueID)
+                print "Found these:{0}".format(attachments)
+                for item in attachments: # add them all
+                    jira.add_attachment(issue=IssueID, attachment=attachments[0])
+                    print "Attachment:{0} added".format(item)
+            else:
+                print "NO attachments  found for key:{0}".format(IssueID)
         
         
         Remarks=Issues[key]["REMARKS"] # take a copy of remarks and use it
         print "-------------------------------------------------------------------------"
-        PARENT=IssueID
+        if (PROD==True):
+            PARENT=IssueID
         #create subtask(s) under one parent
         for subkey , subvalue in Remarks.iteritems():
             
@@ -529,30 +541,32 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             SUBSUMMARY=Remarks[subkey]["SUMMARY"]
             SUBSUMMARY=SUBSUMMARY.replace("\n", "")
             SUBSUMMARY=SUBSUMMARY[:254] ## summary max length is 255
-            SUBISSUETYPE=(Remarks[subkey]["ISSUETYPE"]) #.encode('utf-8'))
-            SUBRESPONSIBLE=(Remarks[subkey]["RESPONSIBLE"])#.encode('utf-8'))
-            SUBPERFORMER=Remarks[subkey]["PERFORMER"]
-            SUBTASKID=subkey
-            SUBCREATED = Remarks[subkey]["SUBCREATED"]
+            #SUBISSUETYPE=(Remarks[subkey]["ISSUETYPE"]) #.encode('utf-8'))
+            #SUBRESPONSIBLE=(Remarks[subkey]["RESPONSIBLE"])#.encode('utf-8'))
+            #SUBPERFORMER=Remarks[subkey]["PERFORMER"]
+            #SUBTASKID=subkey
+            #SUBCREATED = Remarks[subkey]["SUBCREATED"]
           
             
-            print "SUBTASK:{0} ----> {1}".format(subkey, subvalue)
-            print "Remark key:{0}".format(SUBTASKID)
-            print "    A) TODO DECK:{0}".format(Remarks[subkey]["DECK"]).encode('utf-8')
-            print "    B) RODO BLOCK:{0}".format(Remarks[subkey]["BLOCK"]).encode('utf-8')
+            #print "SUBTASK:{0} ----> {1}".format(subkey, subvalue)
+            #print "Remark key:{0}".format(SUBTASKID)
+            #print "    A) TODO DECK:{0}".format(Remarks[subkey]["DECK"]).encode('utf-8')
+            #print "    B) RODO BLOCK:{0}".format(Remarks[subkey]["BLOCK"]).encode('utf-8')
             print "    C) SUBSUMMARY:{0}".format((SUBSUMMARY).encode('utf-8'))
-            print "    D) SUBISSUETYPE:{0}".format((ISSUETYPE).encode('utf-8'))
-            print "    E) SUBRESPONSIBLE:{0}".format((SUBRESPONSIBLE).encode('utf-8'))
-            print "    F) SUBPERFORMER:{0}".format((SUBPERFORMER).encode('utf-8'))
-            print "    G) SUBTASKID:{0}".format(SUBTASKID)
-            print "   H) SUBCREATED:{0}".format(SUBCREATED)
+            #print "    D) SUBISSUETYPE:{0}".format((ISSUETYPE).encode('utf-8'))
+            #print "    E) SUBRESPONSIBLE:{0}".format((SUBRESPONSIBLE).encode('utf-8'))
+            #print "    F) SUBPERFORMER:{0}".format((SUBPERFORMER).encode('utf-8'))
+            #print "    G) SUBTASKID:{0}".format(SUBTASKID)
+            #print "   H) SUBCREATED:{0}".format(SUBCREATED)
             #JIRASUMMARY="Subtask for BGR:{0}".format(subkey)
             #JIRADESCRIPTION="BLOCK:{0}    DECK:{1}".format(Remarks[subkey]["BLOCK"],Remarks[subkey]["DECK"])
             
             # TODO Lisä Block ja deck
-            SubIssueID=CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPONSIBLE,SUBISSUETYPE,SUBPERFORMER,SUBTASKID,SUBCREATED)
-        
-            print "Created subtask:{0}".format(SubIssueID)
+            if (PROD==True):
+                SubIssueID=CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPONSIBLE,SUBISSUETYPE,SUBPERFORMER,SUBTASKID,SUBCREATED)
+                print "Created subtask:{0}".format(SubIssueID)
+            else:
+                print "Skipped subtask creation"
             
         print "*************************************************************************"
         
