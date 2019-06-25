@@ -22,12 +22,12 @@ from CreateIssue import CreateIssue
 import glob
 import json # for json dumo
 from sqlalchemy.sql.expression import false
-
+import re
  
 __version__ = "0.1.1396"
 
 
-logging.basicConfig(level=logging.INFO) # IF calling from Groovy, this must be set logging level DEBUG in Groovy side order these to be written out
+logging.basicConfig(level=logging.DEBUG) # IF calling from Groovy, this must be set logging level DEBUG in Groovy side order these to be written out
 
 
 
@@ -357,8 +357,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             if PARENTKEY in Issues:
                 logging.debug( "Subtask has a known parent {0}".format(PARENTKEY))
                 #REMARKKEY=SubCurrentSheet['J{0}'.format(i)].value  # column J holds Task-ID NW
-                REMARKKEY=(SubCurrentSheet.cell(row=i, column=J).value)
-                #print "REMARKKEY:{0}".format(REMARKKEY)
+                REMARKKEY=(SubCurrentSheet.cell(row=i, column=B).value) #parent key value
+                REMARKKEY=str(REMARKKEY)+"_"+str(i)  # add _ROWNUBER to create really unique key 
+                #print "CREATED REMARKKEY:{0}".format(REMARKKEY)
                 #Issues[KEY]["REMARKS"]={}
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY] = {}
                 
@@ -452,61 +453,73 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
 
     ##########################################################################################################################
     # Create main issues
-    
-    
-  
-    
-    
     if (PROD==True):    
         Authenticate(JIRASERVICE,PSWD,USER)
         jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
+    else:
+        print "Simulated execution only"
 
     #create main issues
     for key, value in Issues.iteritems() :
-        print "ORIGINAL ISSUE KEY:{0}\nVALUE:{1}".format(key, value)
-        print "REMARKS:{0}".format(Issues[key]["REMARKS"])
-        print "SUMMARY:{0}".format((Issues[key]["SUMMARY"]).encode('utf-8'))
-        print "JIRA ISSUE_TYPE:{0}".format((Issues[key]["ISSUE_TYPE"]).encode('utf-8')) 
-        print "ORIGINAL ISSUE_TYPE:{0}".format((Issues[key]["ISSUE_TYPENW"]).encode('utf-8'))    
-        print "JIRA STATUS:{0}".format(Issues[key]["STATUS"])  
-        print "ORIGINAL STATUS:{0}".format(Issues[key]["STATUSNW"])  
-        print "JIRA PRIORITY:{0}".format(Issues[key]["PRIORITY"])  
-  
-        print "ORIGINAL RESPONSIBLE:{0}".format((Issues[key]["RESPONSIBLENW"]).encode('utf8'))    
-        print "JIRA RESPONSIBLE:{0}".format(Issues[key]["RESPONSIBLE"])    
-         
-        print "ORIGINAL CREATED TIME:{0}".format(Issues[key]["INSPECTED"])       
-        print "SHIP NUMBER:{0}".format(Issues[key]["SHIPNUMBER"])  
- 
-        print "SHIPNUMBER:{0}".format(Issues[key]["SHIPNUMBERNW"]) 
-        print "SYSTEM:{0}".format(Issues[key]["SYSTEM"]) 
-        
-        print "ORIGINAL PERFOMER:{0}".format((Issues[key]["PERFORMERNW"]).encode('utf8'))   
-        
-        print "ORIGINAL DEPARTMENT:{0}".format(Issues[key]["DEPARTMENTNW"]) 
-        print "DEPARTMENT:{0}".format(Issues[key]["DEPARTMENT"]) 
-     
-   
-   
-   
-        JIRADESCRIPTION="Inspection Report"
+        KEYVALUE=(key,value)
+        KEY=key
+        print "ORIGINAL ISSUE KEY:{0}\nVALUE:{1}".format(KEY,KEYVALUE)
+        REMARKS=Issues[key]["REMARKS"]
+        print "REMARKS:{0}".format(REMARKS)
+        SUMMARY=((Issues[key]["SUMMARY"]).encode('utf-8'))
+        print "SUMMARY:{0}".format(SUMMARY)
+        ISSUETYPE=((Issues[key]["ISSUE_TYPE"]).encode('utf-8'))
+        print "JIRA ISSUE_TYPE:{0}".format(ISSUETYPE) 
+        ISSUETYPENW=((Issues[key]["ISSUE_TYPENW"]).encode('utf-8')) 
+        print "ORIGINAL ISSUE_TYPE:{0}".format(ISSUETYPENW)  
+        STATUS=Issues[key]["STATUS"]  
+        print "JIRA STATUS:{0}".format(STATUS)  
+        STATUSNW=Issues[key]["STATUSNW"]
+        print "ORIGINAL STATUS:{0}".format(STATUSNW)  
+        PRIORITY=Issues[key]["PRIORITY"]
+        print "JIRA PRIORITY:{0}".format(PRIORITY)  
+        RESPONSIBLENW=((Issues[key]["RESPONSIBLENW"]).encode('utf8'))  
+        print "ORIGINAL RESPONSIBLE:{0}".format(RESPONSIBLENW)    
+        RESPONSIBLE=(Issues[key]["RESPONSIBLE"])
+        print "JIRA RESPONSIBLE:{0}".format(RESPONSIBLE)    
+        INSPECTEDTIME= Issues[key]["INSPECTED"]
+        print "ORIGINAL CREATED TIME:{0}".format(INSPECTEDTIME)
+        SHIP=Issues[key]["SHIPNUMBER"]       
+        print "SHIP NUMBER:{0}".format(SHIP)  
+        SHIPNW=Issues[key]["SHIPNUMBERNW"]
+        print "SHIPNUMBER:{0}".format(SHIPNW)
+        SYSTEM= Issues[key]["SYSTEM"]
+        print "SYSTEM:{0}".format(SYSTEM) 
+        PERFORMERNW=(Issues[key]["PERFORMERNW"]).encode('utf8')
+        print "ORIGINAL PERFOMER:{0}".format(PERFORMERNW)   
+        DEPARTMENTNW=(Issues[key]["DEPARTMENTNW"])
+        print "ORIGINAL DEPARTMENT:{0}".format(DEPARTMENTNW) 
+        DEPARTMENT=(Issues[key]["DEPARTMENT"])
+        print "DEPARTMENT:{0}".format(DEPARTMENT) 
+        DESCRIPTION=(Issues[key]["DESCRIPTION"])
+        print "DESCPTION + TOPOLOGY:{0}".format(DESCRIPTION) 
+
         JIRASUMMARY=(Issues[key]["SUMMARY"]).encode('utf-8')          
         JIRASUMMARY=JIRASUMMARY.replace("\n", " ") # Perl used to have chomp, this was only Python way to do this
         JIRASUMMARY=JIRASUMMARY[:254] ## summary max length is 255
-        KEY=key
-        #REPORTER=Issues[key]["REPORTER"]
-        #CREATOR=Issues[key]["CREATOR"]
-        #INSPECTED=Issues[key]["INSPECTED"] # 30.1.2018  9:32:15 fromat from excel
-        #SHIP=Issues[key]["SHIPNUMBER"]
-        #RESPONSIBLE=Issues[key]["RESPONSIBLE"]
-        #PERFORMER=Issues[key]["PERFORMER"]
-        #BLOCK=Issues[key]["BLOCK"]
-        #DEPARTMENT=Issues[key]["DEPARTMENT"]
-        #DECK=Issues[key]["DECK"]
-        #DECK=DECK.encode('utf-8') # from June 2018 first real import (change in the excel format) 
-        #DECK=DECK 
-        #ISSUETYPE=Issues[key]["ISSUE_TYPE"]
-        #SYSTEMNUMBER=Issues[key]["SYSTEMNUMBER"]
+        print "SUMMARY:{0}".format(JIRASUMMARY)
+       
+        AREA=(Issues[key]["AREA"])
+        print "AREA:{0}".format(AREA) 
+        
+        SURVEYOR=(Issues[key]["SURVEYOR"])
+        print "SURVEYOR:{0}".format(SURVEYOR) 
+        
+        DECKNW=(Issues[key]["DECKNW"])
+        print "DECKNW:{0}".format(DECKNW) 
+        
+        BLOCKNW=(Issues[key]["BLOCKNW"])
+        print "BLOCKNW:{0}".format(BLOCKNW) 
+        
+        FIREZONENW=(Issues[key]["FIREZONENW"])
+        print "FIREZONENW:{0}".format(FIREZONENW) 
+        
+     
         
     
 
@@ -537,37 +550,84 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         
         
         Remarks=Issues[key]["REMARKS"] # take a copy of remarks and use it
+        
         print "-------------------------------------------------------------------------"
         if (PROD==True):
             PARENT=IssueID
         #create subtask(s) under one parent
         for subkey , subvalue in Remarks.iteritems():
             
+            SUBKEYVALUE=(subkey,subvalue)
+            SUBKEY=subkey.encode('utf-8')
             
-            SUBSUMMARY=Remarks[subkey]["SUMMARY"]
+            ParentCheck = re.search( r"(\d*)(_)(\d*)", SUBKEY) # remove unique _ROWNUJMBER identifier
+            if ParentCheck:
+                CurrentGroups=ParentCheck.groups()    
+                #print ("Group 1: %s" % CurrentGroups[0]) 
+                #print ("Group 2: %s" % CurrentGroups[1]) 
+                SUBPARENTKEY=CurrentGroups[0] #logical key (parent original key, used to tell teh parent for this subtask), dictionary key is the subkey 
+            else:
+                log.error("Subtask Parent parsing failure")
+            print "SUBTASK PARENT'S ORIGINAL KEY:{0}\nVALUE:{1}".format(SUBPARENTKEY,SUBKEYVALUE)
+            #TODO CHECK DUPLICATE REMARKS!!
+            
+            SUBSUMMARY=Remarks[subkey]["SUMMARY"] 
             SUBSUMMARY=SUBSUMMARY.replace("\n", "")
-            SUBSUMMARY=SUBSUMMARY[:254] ## summary max length is 255
-            #SUBISSUETYPE=(Remarks[subkey]["ISSUETYPE"]) #.encode('utf-8'))
-            #SUBRESPONSIBLE=(Remarks[subkey]["RESPONSIBLE"])#.encode('utf-8'))
-            #SUBPERFORMER=Remarks[subkey]["PERFORMER"]
-            #SUBTASKID=subkey
-            #SUBCREATED = Remarks[subkey]["SUBCREATED"]
-          
+            SUBSUMMARY=SUBSUMMARY[:254]    ## summary max length is 255
+            SUBSUMMARY=(SUBSUMMARY.encode('utf-8')) 
+            print "SUBSUMMARY:{0}".format(SUBSUMMARY)
             
-            #print "SUBTASK:{0} ----> {1}".format(subkey, subvalue)
-            #print "Remark key:{0}".format(SUBTASKID)
-            #print "    A) TODO DECK:{0}".format(Remarks[subkey]["DECK"]).encode('utf-8')
-            #print "    B) RODO BLOCK:{0}".format(Remarks[subkey]["BLOCK"]).encode('utf-8')
-            print "    C) SUBSUMMARY:{0}".format((SUBSUMMARY).encode('utf-8'))
-            #print "    D) SUBISSUETYPE:{0}".format((ISSUETYPE).encode('utf-8'))
-            #print "    E) SUBRESPONSIBLE:{0}".format((SUBRESPONSIBLE).encode('utf-8'))
-            #print "    F) SUBPERFORMER:{0}".format((SUBPERFORMER).encode('utf-8'))
-            #print "    G) SUBTASKID:{0}".format(SUBTASKID)
-            #print "   H) SUBCREATED:{0}".format(SUBCREATED)
-            #JIRASUMMARY="Subtask for BGR:{0}".format(subkey)
-            #JIRADESCRIPTION="BLOCK:{0}    DECK:{1}".format(Remarks[subkey]["BLOCK"],Remarks[subkey]["DECK"])
+            SUBISSUTYPENW=Remarks[subkey]["ISSUE_TYPENW"] 
+            print "SUBISSUTYPENW:{0}".format(SUBISSUTYPENW)
+            SUBISSUTYPE=Remarks[subkey]["ISSUE_TYPE"] 
+            print "SUBISSUTYPE:{0}".format(SUBISSUTYPE)
             
-            # TODO Lisä Block ja deck
+            SUBSTATUSNW=Remarks[subkey]["STATUSNW"] 
+            print "SUBSTATUSNW:{0}".format(SUBSTATUSNW)
+            
+            SUBSTATUS=Remarks[subkey]["STATUS"] 
+            print "SUBSTATUS:{0}".format(SUBSTATUS)
+            
+            SUBREPORTERNW=Remarks[subkey]["REPORTERNW"].encode('utf-8') 
+            print "SUBREPORTERNW:{0}".format(SUBREPORTERNW)
+            
+            SUBCREATED=Remarks[subkey]["SUBCREATED"] 
+            print "SUBCREATED:{0}".format(SUBCREATED)
+            
+            SUBDESCRIPTION=Remarks[subkey]["DESCRIPTION"].encode('utf-8') 
+            print "SUBDESCRIPTION:{0}".format(SUBDESCRIPTION)
+            
+            SUBSHIPNUMBER=Remarks[subkey]["SHIPNUMBER"] 
+            print "SUBSHIPNUMBER:{0}".format(SUBSHIPNUMBER)
+            
+            SUBSYSTEMNUMBERNW=Remarks[subkey]["SYSTEMNUMBERNW"] 
+            print "SUBSYSTEMNUMBERNW:{0}".format(SUBSYSTEMNUMBERNW)
+            
+            SUBPERFORMER=Remarks[subkey]["PERFORMER"].encode('utf-8') 
+            print "SUBPERFORMER:{0}".format(SUBPERFORMER)
+            
+            SUBRESPONSIBLENW=Remarks[subkey]["RESPONSIBLENW"].encode('utf-8') 
+            print "SUBRESPONSIBLENW:{0}".format(SUBRESPONSIBLENW)
+            
+            SUBASSIGNEE=Remarks[subkey]["ASSIGNEE"] 
+            print "SUBASSIGNEE:{0}".format(SUBASSIGNEE)
+            
+            SUBINSPECTION=Remarks[subkey]["SUBINSPECTION"] 
+            print "SUBINSPECTION:{0}".format(SUBINSPECTION)
+            
+            SUBDEPARTMENTNW=Remarks[subkey]["DEPARTMENTNW"] 
+            print "SUBDEPARTMENTNW:{0}".format(SUBDEPARTMENTNW)
+            
+            SUBDEPARTMENT=Remarks[subkey]["DEPARTMENT"] 
+            print "SUBDEPARTMENT:{0}".format(SUBDEPARTMENT)
+            
+            SUBBLOCKNW=Remarks[subkey]["BLOCKNW"] 
+            print "SUBBLOCKNW:{0}".format(SUBBLOCKNW)
+            
+            SUBDECKNW=Remarks[subkey]["DECKNW"] 
+            print "SUBDECKNW:{0}".format(SUBDECKNW)
+            
+            print ".................................."
             if (PROD==True):
                 SubIssueID=CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPONSIBLE,SUBISSUETYPE,SUBPERFORMER,SUBTASKID,SUBCREATED)
                 print "Created subtask:{0}".format(SubIssueID)
