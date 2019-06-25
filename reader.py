@@ -23,11 +23,12 @@ import glob
 import json # for json dumo
 from sqlalchemy.sql.expression import false
 import re
+import time
  
 __version__ = "0.1.1396"
 
 
-logging.basicConfig(level=logging.DEBUG) # IF calling from Groovy, this must be set logging level DEBUG in Groovy side order these to be written out
+logging.basicConfig(level=logging.INFO) # IF calling from Groovy, this must be set logging level DEBUG in Groovy side order these to be written out
 
 
 
@@ -99,12 +100,15 @@ def main(argv):
 def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTACHDIR):
     
     #false skips issue creation and other jira operations
-    PROD=False
+    PROD=True #False
+    ATTACHMENTS=False
+    ENV="DEV" # or "PROD", sets the custom fields
     
     
-    logging.debug ("Filepath: %s     Filename:%s" %(filepath ,filename))
+    
+    logging.info ("Filepath: %s     Filename:%s" %(filepath ,filename))
     files=filepath+"/"+filename
-    logging.debug ("Excel (main issues) file:{0}".format(files))
+    logging.info ("Excel (main issues) file:{0}".format(files))
    
     Issues=defaultdict(dict) 
 
@@ -120,9 +124,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
 
 
     #subtasks
-    logging.debug ("Subtasks ---> Filepath: %s     Filename:%s" %(filepath ,subfilename))
+    logging.info ("Subtasks ---> Filepath: %s     Filename:%s" %(filepath ,subfilename))
     subfiles=filepath+"/"+subfilename
-    logging.debug ("Subtasks file:{0}".format(subfiles))
+    logging.info ("Subtasks file:{0}".format(subfiles))
    
     
     SubMainSheet="general_report" 
@@ -466,8 +470,6 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         print "ORIGINAL ISSUE KEY:{0}\nVALUE:{1}".format(KEY,KEYVALUE)
         REMARKS=Issues[key]["REMARKS"]
         print "REMARKS:{0}".format(REMARKS)
-        SUMMARY=((Issues[key]["SUMMARY"]).encode('utf-8'))
-        print "SUMMARY:{0}".format(SUMMARY)
         ISSUETYPE=((Issues[key]["ISSUE_TYPE"]).encode('utf-8'))
         print "JIRA ISSUE_TYPE:{0}".format(ISSUETYPE) 
         ISSUETYPENW=((Issues[key]["ISSUE_TYPENW"]).encode('utf-8')) 
@@ -527,8 +529,10 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         
         #IssueID="SHIP-1826" #temp ID
         if (PROD==True):
-            IssueID=CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFORMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE,SYSTEMNUMBER)
+            IssueID=CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATUS,STATUSNW,PRIORITY,RESPONSIBLENW,RESPONSIBLE,INSPECTEDTIME,SHIP,SHIPNW,SYSTEM,PERFORMERNW,DEPARTMENTNW,DEPARTMENT,DESCRIPTION,AREA,SURVEYOR,DECKNW,BLOCKNW,FIREZONENW)
             print "Issue:{0}".format(IssueID)
+            time.sleep(0.5)
+            sys.exit(1)
             #print "IssueKey:{0}".format(IssueID.key)
         else:
            print "--> SKIPPED ISSUE CREATION" 
@@ -537,7 +541,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         print "filesx:{0}".format(filesx)
         
         
-        if (PROD==True):
+        if (ATTACHMENTS==True):
             attachments=glob.glob("{0}".format(filesx))
             if (len(attachments) > 0): # if any attachment with key embedded to name found
                 print "Found attachments for key:{0}".format(IssueID)
@@ -545,9 +549,11 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
                 for item in attachments: # add them all
                     jira.add_attachment(issue=IssueID, attachment=attachments[0])
                     print "Attachment:{0} added".format(item)
+                    time.sleep(0.5)
             else:
                 print "NO attachments  found for key:{0}".format(IssueID)
-        
+        else:
+            print "Skipped Attachment operations"
         
         Remarks=Issues[key]["REMARKS"] # take a copy of remarks and use it
         
@@ -555,6 +561,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         if (PROD==True):
             PARENT=IssueID
         #create subtask(s) under one parent
+        # custom ids in comments: 1) dev 2) production
         for subkey , subvalue in Remarks.iteritems():
             
             SUBKEYVALUE=(subkey,subvalue)
@@ -629,8 +636,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             
             print ".................................."
             if (PROD==True):
-                SubIssueID=CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPONSIBLE,SUBISSUETYPE,SUBPERFORMER,SUBTASKID,SUBCREATED)
+                #SubIssueID=CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW)
                 print "Created subtask:{0}".format(SubIssueID)
+                time.sleep(0.5)
             else:
                 print "Skipped subtask creation"
             

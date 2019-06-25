@@ -88,70 +88,43 @@ def main(argv):
     
 
 ####################################################################################
-def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED,INSPECTED,SHIP,PERFOMER,RESPONSIBLE,BLOCK,DEPARTMENT,DECK,ISSUETYPE,SYSTEMNUMBER):
+def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATUS,STATUSNW,PRIORITY,RESPONSIBLENW,RESPONSIBLE,INSPECTEDTIME,SHIP,SHIPNW,SYSTEM,PERFORMERNW,DEPARTMENTNW,DEPARTMENT,DESCRIPTION,AREA,SURVEYOR,DECKNW,BLOCKNW,FIREZONENW):
     jiraobj=jira
     project=JIRAPROJECT
-    
-    
-    #lottery = random.randint(1,3)
-    #if (lottery==1):
-    #    TASKTYPE="Steal"
-    #elif (lottery>1):
-    #    TASKTYPE="Outfitting"
-    #else:
-    #    TASKTYPE="Task"
-    
-    TASKTYPE="Hull Inspection NW"
-    #TASKTYPE="Task"
+
     
     print "Creating issue for JIRA project: {0}".format(project)
     
 
-    
     issue_dict = {
     'project': {'key': JIRAPROJECT},
     'summary': JIRASUMMARY,
-    'description': JIRADESCRIPTION,
-    'issuetype': {'name': TASKTYPE},
-    # ALMDEMO
-    #'customfield_12317': str(KEY),  # Key in ALM demo 
-    #'customfield_12318': str(CREATOR),  # Reporter in ALM demo
-    ##'customfield_12319': str(REPORTER),  # Creator in ALM demo
-
-    'customfield_12320': str(CREATED),  # Original Created Time in ALM demo
-    'customfield_12321': str(SHIP), # Ship Number in ALM demo
-    'customfield_12322': str(PERFOMER), # PerformerNW in ALM demo
-    'customfield_12323': str(RESPONSIBLE), # ResponsibleNW in ALM demo
-    'customfield_12324': str(BLOCK), # BlockNW in ALM demo
-    #'customfield_12326': DECK.encode('utf-8'), # DeckNW in ALM demo
-    'customfield_12326': str(DECK), # DeckNW in ALM demo    from June 2018 first real import (change in the excel format) 
-    'customfield_12328': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
-    'customfield_12330': str(INSPECTED), # Original inspectiond date
-    'customfield_12331': ISSUETYPE.encode('utf-8'), # Original inspectiond date
-    'customfield_12334': SYSTEMNUMBER.encode('utf-8'), # System Number NW
-
-    #PROD:
-    'customfield_12900': str(KEY),  # Key in ALM demo
-    'customfield_12902': str(CREATOR),  # Reporter in ALM demo
-    ##'customfield_12901': str(REPORTER),  # Creator in ALM demo
-    'customfield_12903': str(CREATED),  # Original Created Time in ALM demo
-    'customfield_12904': str(SHIP), # Ship Number in ALM demo
-    'customfield_12905': str(PERFOMER), # PerformerNW in ALM demo
-    'customfield_12906': str(RESPONSIBLE), # ResponsibleNW in ALM demo
-    'customfield_12907': str(BLOCK), # BlockNW in ALM demo
-    #'customfield_12908': DECK.encode('utf-8'), # DeckNW in ALM demo from June 2018 first real import (change in the excel format) 
-    'customfield_12908': str(DECK), # DeckNW in ALM demo
-    'customfield_12909': str(DEPARTMENT), # DEPARTMENTNW in ALM demo
-    'customfield_13102': str(INSPECTED), # Original inspectiond date
-    'customfield_13101': ISSUETYPE.encode('utf-8'), # Original inspectiond date
-    'customfield_13103': SYSTEMNUMBER.encode('utf-8'), # System Number NW
-
-
+    'description': DESCRIPTION,
+    'issuetype': {'name': ISSUETYPE},
+    
+    'customfield_14613' if (ENV =="DEV") else 'customfield_14212' : str(SYSTEM),
+    'customfield_14612' if (ENV =="DEV") else 'customfield_14212' : str(SHIP),
+    'customfield_14607' if (ENV =="DEV") else 'customfield_14212' : str(PERFORMERNW),
+    
+    'customfield_10013' if (ENV =="DEV") else 'customfield_14212' : str(INSPECTEDTIME),
+    'customfield_12900' if (ENV =="DEV") else 'customfield_14212' : str(KEY),
     }
+
 
     try:
         new_issue = jiraobj.create_issue(fields=issue_dict)
         print "Issue created OK"
+
+
+        if (ENV =="DEV"):
+            DEPARTMENTFIELD="customfield_14608" # DisciplineF 
+            new_issue.update(fields={DEPARTMENTFIELD: {'value': DEPARTMENTNW}})  #   DISCIPLIN 
+        elif (ENV =="PROD"):
+            DEPARTMENTFIELD="customfield_14328" #  DisciplineRM
+            new_issue.update(fields={DEPARTMENTFIELD: {'value' : DEPARTMENTNW}})  #   DISCIPLIN 
+    
+    
+    
     except Exception,e:
         print("Failed to create JIRA object, error: %s" % e)
         sys.exit(1)
@@ -160,11 +133,10 @@ def CreateIssue(jira,JIRAPROJECT,JIRASUMMARY,JIRADESCRIPTION,KEY,CREATOR,CREATED
 ############################################################################################'
 # Quick way to create subtask
 #
-def CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,JIRASUBDESCRIPTION,PARENT,SUBRESPONSIBLE,SUBISSUETYPE,SUBPERFORMER,SUBTASKID,SUBCREATED):
+def CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW):
     jiraobj=jira
     project=JIRAPROJECT
-    #SUBTASKTYPE="Remark1"
-    SUBTASKTYPE="Hull Remark"
+ 
     print "Creating subtask for JIRA project: {0} Parent:{1}".format(project,PARENT)
     issue_dict = {
     'project': {'key': JIRAPROJECT},
