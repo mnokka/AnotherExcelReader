@@ -473,8 +473,23 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         print "REMARKS:{0}".format(REMARKS)
         ISSUETYPE=((Issues[key]["ISSUE_TYPE"]).encode('utf-8'))
         print "JIRA ISSUE_TYPE:{0}".format(ISSUETYPE) 
-        ISSUETYPENW=((Issues[key]["ISSUE_TYPENW"]).encode('utf-8')) 
+        
+        ISSUETYPENW=(Issues[key]["ISSUE_TYPENW"])
+        if (ISSUETYPENW is None):
+             ISSUETYPENW=(Issues[key]["ISSUE_TYPENW"]) #to keep None object??
+        else: 
+            ISSUETYPENW=str((Issues[key]["ISSUE_TYPENW"]).encode('utf-8'))  # str casting needed
+        # excel is full of typos, fix them here
+        if (ISSUETYPENW.lower()=="Outfitting Inspection".lower()):
+                ISSUETYPENW="Outfitting Inspection"
+        elif (ISSUETYPENW.lower()=="Hull Inspection".lower()):
+                ISSUETYPENW="Hull Inspection"
+        else:
+            print"Totally lost main task issuetype casting. HELP!" 
+            
+            
         print "ORIGINAL ISSUE_TYPE:{0}".format(ISSUETYPENW)  
+        
         STATUS=Issues[key]["STATUS"]  
         print "JIRA STATUS:{0}".format(STATUS)  
         STATUSNW=Issues[key]["STATUSNW"]
@@ -491,9 +506,19 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         print "SHIP NUMBER:{0}".format(SHIP)  
 
         SYSTEM= Issues[key]["SYSTEM"]
+        if (SYSTEM is None):
+            SYSTEM=Issues[key]["SYSTEM"] #to keep None object??
+        else: 
+            SYSTEM=str((Issues[key]["SYSTEM"]))  # str casting needed
         print "SYSTEM:{0}".format(SYSTEM) 
+        
         SYSTEMNUMBERNW= Issues[key]["SYSTEMNUMBERNW"]
+        if (SYSTEMNUMBERNW is None):
+            SYSTEMNUMBERNW=Issues[key]["SYSTEMNUMBERNW"] #to keep None object??
+        else: 
+            SYSTEMNUMBERNW=str((Issues[key]["SYSTEMNUMBERNW"]))  # str casting needed
         print "SYSTEMNUMBERNW:{0}".format(SYSTEMNUMBERNW) 
+        
         PERFORMERNW=(Issues[key]["PERFORMERNW"]).encode('utf8')
         print "ORIGINAL PERFOMER:{0}".format(PERFORMERNW)   
         DEPARTMENTNW=(Issues[key]["DEPARTMENTNW"])
@@ -520,7 +545,11 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         BLOCKNW=Issues[key]["BLOCKNW"]
         print "BLOCKNW:{0}".format(BLOCKNW) 
         
-        FIREZONENW=str((Issues[key]["FIREZONENW"]))  # str casting needed
+        FIREZONENW=Issues[key]["FIREZONENW"]
+        if (FIREZONENW is None):
+            FIREZONENW=Issues[key]["FIREZONENW"] #to keep None object??
+        else: 
+            FIREZONENW=str((Issues[key]["FIREZONENW"]))  # str casting needed
         print "FIREZONENW:{0}".format(FIREZONENW) 
         
      
@@ -535,7 +564,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             print "Created issue:{0}  OK".format(IssueID)
             print "-----------------------------------------------------------"
             time.sleep(0.5)
-            sys.exit(1)
+            #sys.exit(1)
             #print "IssueKey:{0}".format(IssueID.key)
         else:
            print "--> SKIPPED ISSUE CREATION" 
@@ -640,8 +669,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             print ".................................."
             if (PROD==True):
                 #SubIssueID=CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW)
-                print "Created subtask:{0}".format(SubIssueID)
-                time.sleep(0.5)
+                #print "Created subtask:{0}".format(SubIssueID)
+                #time.sleep(0.5)
+                print "SKIPPED SUBTASK OPERATIONS. SHOULD HAVE CREATED"
             else:
                 print "Skipped subtask creation"
             
