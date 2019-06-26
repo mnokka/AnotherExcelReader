@@ -212,7 +212,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     for row in CurrentSheet[('B{}:B{}'.format(DATASTARTSROW,ENDROW))]:  # go trough all column B (KEY) rows
         for mycell in row:
             KEY=mycell.value
-            #logging.debug("ROW:{0} Original ID:{1}".format(i,mycell.value))
+            #print "ROW:{0} Original ID:{1}".format(i,mycell.value)
+            #print "KEY:{0}".format(KEY)
             Issues[KEY]={} # add to dictionary as master key (KEY)
             
             #Just hardocode operations, POC is one off (actually second time this tool variant is used......)
@@ -269,8 +270,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             #RESPHONE=(CurrentSheet.cell(row=i, column=U).value)
             #Issues[KEY]["RESPHONE"] = RESPHONE
             
-            SHIPNUMBERNW=(CurrentSheet.cell(row=i, column=M).value)
-            Issues[KEY]["SHIPNUMBERNW"] = SHIPNUMBERNW
+            SYSTEMNUMBERNW=(CurrentSheet.cell(row=i, column=M).value)
+            Issues[KEY]["SYSTEMNUMBERNW"] = SYSTEMNUMBERNW
             
             SYSTEM=(CurrentSheet.cell(row=i, column=N).value)
             Issues[KEY]["SYSTEM"] = SYSTEM
@@ -316,7 +317,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             #logging.debug("---------------------------------------------------")
             i=i+1
             
-            key=KEY
+            # ???? key=KEY
             #HandleAttachemnts(filepath,key,ATTACHDIR)
             
     #print Issues
@@ -334,7 +335,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     #    print key, value
 
 
-   # print "EXITNG NOW!"
+    #print "EXITNG NOW!"
     #sys.exit(5)
     
 
@@ -353,7 +354,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     for row in SubCurrentSheet[('B{}:B{}'.format(DATASTARTSROWSUB,SubCurrentSheet.max_row))]:  # go trough all column B (KEY) rows
         for submycell in row:
             PARENTKEY=submycell.value
-            logging.debug("SUBROW:{0} Original PARENT ID:{1}".format(i,PARENTKEY))
+            #logging.debug("SUBROW:{0} Original PARENT ID:{1}".format(i,PARENTKEY))
             #Issues[KEY]={} # add to dictionary as master key (KEY)
             
             #Just hardocode operations, POC is one off
@@ -480,7 +481,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         print "ORIGINAL STATUS:{0}".format(STATUSNW)  
         PRIORITY=Issues[key]["PRIORITY"]
         print "JIRA PRIORITY:{0}".format(PRIORITY)  
-        RESPONSIBLENW=((Issues[key]["RESPONSIBLENW"]).encode('utf8'))  
+        RESPONSIBLENW=str(((Issues[key]["RESPONSIBLENW"]).encode('utf8')))  
         print "ORIGINAL RESPONSIBLE:{0}".format(RESPONSIBLENW)    
         RESPONSIBLE=(Issues[key]["RESPONSIBLE"])
         print "JIRA RESPONSIBLE:{0}".format(RESPONSIBLE)    
@@ -488,10 +489,11 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         print "ORIGINAL CREATED TIME:{0}".format(INSPECTEDTIME)
         SHIP=Issues[key]["SHIPNUMBER"]       
         print "SHIP NUMBER:{0}".format(SHIP)  
-        SHIPNW=Issues[key]["SHIPNUMBERNW"]
-        print "SHIPNUMBER:{0}".format(SHIPNW)
+
         SYSTEM= Issues[key]["SYSTEM"]
         print "SYSTEM:{0}".format(SYSTEM) 
+        SYSTEMNUMBERNW= Issues[key]["SYSTEMNUMBERNW"]
+        print "SYSTEMNUMBERNW:{0}".format(SYSTEMNUMBERNW) 
         PERFORMERNW=(Issues[key]["PERFORMERNW"]).encode('utf8')
         print "ORIGINAL PERFOMER:{0}".format(PERFORMERNW)   
         DEPARTMENTNW=(Issues[key]["DEPARTMENTNW"])
@@ -515,10 +517,10 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         DECKNW=(Issues[key]["DECKNW"])
         print "DECKNW:{0}".format(DECKNW) 
         
-        BLOCKNW=(Issues[key]["BLOCKNW"])
+        BLOCKNW=Issues[key]["BLOCKNW"]
         print "BLOCKNW:{0}".format(BLOCKNW) 
         
-        FIREZONENW=(Issues[key]["FIREZONENW"])
+        FIREZONENW=str((Issues[key]["FIREZONENW"]))  # str casting needed
         print "FIREZONENW:{0}".format(FIREZONENW) 
         
      
@@ -529,8 +531,9 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         
         #IssueID="SHIP-1826" #temp ID
         if (PROD==True):
-            IssueID=CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATUS,STATUSNW,PRIORITY,RESPONSIBLENW,RESPONSIBLE,INSPECTEDTIME,SHIP,SHIPNW,SYSTEM,PERFORMERNW,DEPARTMENTNW,DEPARTMENT,DESCRIPTION,AREA,SURVEYOR,DECKNW,BLOCKNW,FIREZONENW)
-            print "Issue:{0}".format(IssueID)
+            IssueID=CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATUS,STATUSNW,PRIORITY,RESPONSIBLENW,RESPONSIBLE,INSPECTEDTIME,SHIP,SYSTEMNUMBERNW,SYSTEM,PERFORMERNW,DEPARTMENTNW,DEPARTMENT,DESCRIPTION,AREA,SURVEYOR,DECKNW,BLOCKNW,FIREZONENW)
+            print "Created issue:{0}  OK".format(IssueID)
+            print "-----------------------------------------------------------"
             time.sleep(0.5)
             sys.exit(1)
             #print "IssueKey:{0}".format(IssueID.key)

@@ -88,7 +88,7 @@ def main(argv):
     
 
 ####################################################################################
-def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATUS,STATUSNW,PRIORITY,RESPONSIBLENW,RESPONSIBLE,INSPECTEDTIME,SHIP,SHIPNW,SYSTEM,PERFORMERNW,DEPARTMENTNW,DEPARTMENT,DESCRIPTION,AREA,SURVEYOR,DECKNW,BLOCKNW,FIREZONENW):
+def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATUS,STATUSNW,PRIORITY,RESPONSIBLENW,RESPONSIBLE,INSPECTEDTIME,SHIP,SYSTEMNUMBERNW,SYSTEM,PERFORMERNW,DEPARTMENTNW,DEPARTMENT,DESCRIPTION,AREA,SURVEYOR,DECKNW,BLOCKNW,FIREZONENW):
     jiraobj=jira
     project=JIRAPROJECT
 
@@ -101,6 +101,7 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
     'summary': JIRASUMMARY,
     'description': DESCRIPTION,
     'issuetype': {'name': ISSUETYPE},
+    'priority': {'name': PRIORITY},
     
     'customfield_14613' if (ENV =="DEV") else 'customfield_14212' : str(SYSTEM),
     'customfield_14612' if (ENV =="DEV") else 'customfield_14212' : str(SHIP),
@@ -108,6 +109,7 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
     
     'customfield_10013' if (ENV =="DEV") else 'customfield_14212' : str(INSPECTEDTIME),
     'customfield_12900' if (ENV =="DEV") else 'customfield_14212' : str(KEY),
+    'customfield_12906' if (ENV =="DEV") else 'customfield_14212' : str(RESPONSIBLENW),
     }
 
     #status
@@ -120,26 +122,38 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
         
         # all custom fields could be objects with certain values for certain environments
         if (ENV =="DEV"):
-            DEPARTMENTNWTFIELD="customfield_14608" 
-            new_issue.update(fields={DEPARTMENTNWTFIELD: {'value': DEPARTMENTNW}})  
+                      
+            print "Updating AREA"          
+            if (AREA is None):
+                new_issue.update(notify=False,fields={"customfield_10007":[ {"id": "-1"}]})  # multiple selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
+            else:
+                new_issue.update(notify=False,fields={"customfield_10007": [{"value": AREA}]})
             
-            DEPARTMENTFIELD="customfield_10010" 
-            new_issue.update(fields={DEPARTMENTFIELD: {'value': DEPARTMENT}})
+            print "Updating RESPONSIBLE"    
+            if (RESPONSIBLE is None):
+                new_issue.update(notify=False,fields={"customfield_10049": {"id": "-1"}})  # user selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
+            else:
+                new_issue.update(notify=False,fields={"customfield_10049": {'name': RESPONSIBLE}})   
+                
+                
             
-            STATUSNWFIELD="customfield_14606" 
-            new_issue.update(fields={STATUSNWFIELD: {'value': STATUSNW}})  
+            CustomFieldSetter(new_issue,"customfield_14608" ,DEPARTMENTNW) 
             
-            
-            ISSUTYPENWFIELD="customfield_14604" 
-            new_issue.update(fields={ISSUTYPENWFIELD: {'value': ISSUETYPENW}})  
-            
-            #SYSTEMNUMBERNWFIELD="customfield_14605" 
-            #if (SYSTEM is None):
-            #    new_issue.update(fields={SYSTEMNUMBERNWFIELD: {"id": "-1"}})
-            #else:    
-            #    new_issue.update(fields={SYSTEMNUMBERNWFIELD: {'value': SYSTEM}})
-            
+            CustomFieldSetter(new_issue,"customfield_10010" ,DEPARTMENT)
+           
+            CustomFieldSetter(new_issue,"customfield_14606" ,STATUSNW)  
+            CustomFieldSetter(new_issue,"customfield_14605" ,SYSTEM)       
+                    
             CustomFieldSetter(new_issue,"customfield_14604" ,ISSUETYPENW)
+            CustomFieldSetter(new_issue,"customfield_14603" ,BLOCKNW)
+            
+            CustomFieldSetter(new_issue,"customfield_14601" ,DECKNW)
+            CustomFieldSetter(new_issue,"customfield_14602" ,FIREZONENW)
+            
+            
+           
+       
+           
             
             
             
@@ -172,7 +186,7 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
             #map state to neede transit. Assunming WF supports thse transit (do for example admin only transit possibilty for migration)
             if (STATUS=="Closed"):
                 TRANSIT="CLOSED"
-            if (NEWSTATUS=="Inspected"):
+            if (STATUS=="Inspected"):
                 TRANSIT="INSPECTED"
            
             
@@ -185,7 +199,8 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
     
     
     except Exception,e:
-        print("Failed to create JIRA object, error: %s" % e)
+        print("Failed to create/use JIRA object, error: %s" % e)
+        print "Issue was:{0}".format(new_issue)
         sys.exit(1)
     return new_issue 
 
@@ -196,14 +211,16 @@ def CustomFieldSetter(new_issue,CUSTOMFIELDNAME,CUSTOMFIELDVALUE):
     
     try:
     
+        print "Trying update issue:{0}, field:{1}, value:{2}".format(new_issue,CUSTOMFIELDNAME,CUSTOMFIELDVALUE)
         if (CUSTOMFIELDVALUE is None):
-            new_issue.update(fields={CUSTOMFIELDNAME: {"id": "-1"}})
+            new_issue.update(notify=False,fields={CUSTOMFIELDNAME: {"id": "-1"}})
         else:    
-            new_issue.update(fields={CUSTOMFIELDNAME: {'value': CUSTOMFIELDVALUE}})
-        print "Issue updated ok"    
+            new_issue.update(notify=False,fields={CUSTOMFIELDNAME: {'value': CUSTOMFIELDVALUE}})            
+        print "Issue:{0} field:{1} updated ok (value:{2})".format(new_issue,CUSTOMFIELDNAME,CUSTOMFIELDVALUE)    
 
     except Exception,e:
         print("Failed to UPDATE JIRA object, error: %s" % e)
+        print "Issue was:{0}".format(new_issue)
         sys.exit(1)
 
 ############################################################################################'
