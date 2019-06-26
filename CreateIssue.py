@@ -110,18 +110,77 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
     'customfield_12900' if (ENV =="DEV") else 'customfield_14212' : str(KEY),
     }
 
+    #status
 
     try:
         new_issue = jiraobj.create_issue(fields=issue_dict)
         print "Issue created OK"
+        print "Updating now all selection custom fields"
 
-
+        
+        # all custom fields could be objects with certain values for certain environments
         if (ENV =="DEV"):
-            DEPARTMENTFIELD="customfield_14608" # DisciplineF 
-            new_issue.update(fields={DEPARTMENTFIELD: {'value': DEPARTMENTNW}})  #   DISCIPLIN 
+            DEPARTMENTNWTFIELD="customfield_14608" 
+            new_issue.update(fields={DEPARTMENTNWTFIELD: {'value': DEPARTMENTNW}})  
+            
+            DEPARTMENTFIELD="customfield_10010" 
+            new_issue.update(fields={DEPARTMENTFIELD: {'value': DEPARTMENT}})
+            
+            STATUSNWFIELD="customfield_14606" 
+            new_issue.update(fields={STATUSNWFIELD: {'value': STATUSNW}})  
+            
+            
+            ISSUTYPENWFIELD="customfield_14604" 
+            new_issue.update(fields={ISSUTYPENWFIELD: {'value': ISSUETYPENW}})  
+            
+            #SYSTEMNUMBERNWFIELD="customfield_14605" 
+            #if (SYSTEM is None):
+            #    new_issue.update(fields={SYSTEMNUMBERNWFIELD: {"id": "-1"}})
+            #else:    
+            #    new_issue.update(fields={SYSTEMNUMBERNWFIELD: {'value': SYSTEM}})
+            
+            CustomFieldSetter(new_issue,"customfield_14604" ,ISSUETYPENW)
+            
+            
+            
         elif (ENV =="PROD"):
-            DEPARTMENTFIELD="customfield_14328" #  DisciplineRM
-            new_issue.update(fields={DEPARTMENTFIELD: {'value' : DEPARTMENTNW}})  #   DISCIPLIN 
+            DEPARTMENTNWTFIELD="customfield_14328" 
+            new_issue.update(fields={DEPARTMENTNWTFIELD: {'value' : DEPARTMENTNW}})  
+            
+            DEPARTMENTFIELD="customfield_14328" 
+            new_issue.update(fields={DEPARTMENTFIELD: {'value' : DEPARTMENT}}) 
+            
+            STATUSNWFIELD="customfield_14328" 
+            new_issue.update(fields={STATUSNWFIELD: {'value' : STATUSNW}}) 
+            
+            ISSUTYPENWFIELD="customfield_14328" 
+            new_issue.update(fields={ISSUTYPENWFIELD: {'value' : ISSUETYPENW}})
+            
+            SYSTEMNUMBERNWFIELD="customfield_14328" 
+            new_issue.update(fields={SYSTEMNUMBERNWFIELD: {'value' : SYSTEM}})
+            
+    
+       
+    
+    
+        print "Transit issue status"
+        
+        
+        
+        if (STATUS != "Todo"): # initial status after creation
+            
+            #map state to neede transit. Assunming WF supports thse transit (do for example admin only transit possibilty for migration)
+            if (STATUS=="Closed"):
+                TRANSIT="CLOSED"
+            if (NEWSTATUS=="Inspected"):
+                TRANSIT="INSPECTED"
+           
+            
+            print "Newstatus will be:{0}".format(STATUS)
+            print "===> Executing transit:{0}".format(TRANSIT)
+            jiraobj.transition_issue(new_issue, transition=TRANSIT)  # trantsit to state where it was in excel
+        else:
+            print "Initial status found: {0}, nothing done".format(STATUS)
     
     
     
@@ -129,6 +188,23 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
         print("Failed to create JIRA object, error: %s" % e)
         sys.exit(1)
     return new_issue 
+
+##################################################################################
+# used only selection custom fields
+
+def CustomFieldSetter(new_issue,CUSTOMFIELDNAME,CUSTOMFIELDVALUE):
+    
+    try:
+    
+        if (CUSTOMFIELDVALUE is None):
+            new_issue.update(fields={CUSTOMFIELDNAME: {"id": "-1"}})
+        else:    
+            new_issue.update(fields={CUSTOMFIELDNAME: {'value': CUSTOMFIELDVALUE}})
+        print "Issue updated ok"    
+
+    except Exception,e:
+        print("Failed to UPDATE JIRA object, error: %s" % e)
+        sys.exit(1)
 
 ############################################################################################'
 # Quick way to create subtask
