@@ -471,7 +471,15 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         print "ORIGINAL ISSUE KEY:{0}\nVALUE:{1}".format(KEY,KEYVALUE)
         REMARKS=Issues[key]["REMARKS"]
         print "REMARKS:{0}".format(REMARKS)
+        
         ISSUETYPE=((Issues[key]["ISSUE_TYPE"]).encode('utf-8'))
+        # excel is full of typos, fix them here
+        if (ISSUETYPE.lower()=="Outfitting Inspection".lower()):
+                ISSUETYPE="Outfitting Inspection"
+        elif (ISSUETYPE.lower()=="Hull Inspection".lower()):
+                ISSUETYPE="Hull Inspection"
+        else:
+            print"Totally lost main task issuetype casting. HELP!"
         print "JIRA ISSUE_TYPE:{0}".format(ISSUETYPE) 
         
         ISSUETYPENW=(Issues[key]["ISSUE_TYPENW"])
@@ -479,13 +487,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
              ISSUETYPENW=(Issues[key]["ISSUE_TYPENW"]) #to keep None object??
         else: 
             ISSUETYPENW=str((Issues[key]["ISSUE_TYPENW"]).encode('utf-8'))  # str casting needed
-        # excel is full of typos, fix them here
-        if (ISSUETYPENW.lower()=="Outfitting Inspection".lower()):
-                ISSUETYPENW="Outfitting Inspection"
-        elif (ISSUETYPENW.lower()=="Hull Inspection".lower()):
-                ISSUETYPENW="Hull Inspection"
-        else:
-            print"Totally lost main task issuetype casting. HELP!" 
+       
             
             
         print "ORIGINAL ISSUE_TYPE:{0}".format(ISSUETYPENW)  
