@@ -30,7 +30,7 @@ __version__ = "0.1.1396"
 
 logging.basicConfig(level=logging.INFO) # IF calling from Groovy, this must be set logging level DEBUG in Groovy side order these to be written out
 
-
+start = time.clock()
 
 def main(argv):
     
@@ -363,6 +363,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
                 logging.debug( "Subtask has a known parent {0}".format(PARENTKEY))
                 #REMARKKEY=SubCurrentSheet['J{0}'.format(i)].value  # column J holds Task-ID NW
                 REMARKKEY=(SubCurrentSheet.cell(row=i, column=B).value) #parent key value
+                SUBORIGINALREMARKEY=REMARKKEY # record old parent key for storing to remark
                 REMARKKEY=str(REMARKKEY)+"_"+str(i)  # add _ROWNUBER to create really unique key 
                 #print "CREATED REMARKKEY:{0}".format(REMARKKEY)
                 #Issues[KEY]["REMARKS"]={}
@@ -371,6 +372,10 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
                 
                 # Just hardcode operattions, POC is one off
                 #DECK=SubCurrentSheet['AA{0}'.format(i)].value  # column AA holds DECK
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUBORIGINALREMARKEY"] = SUBORIGINALREMARKEY
+                
+                Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUBKEY"] = REMARKKEY
+                
                 SUBSUMMARY=(SubCurrentSheet.cell(row=i, column=SUB_C).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["SUMMARY"] = SUBSUMMARY
                 
@@ -542,6 +547,10 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         print "SURVEYOR:{0}".format(SURVEYOR) 
         
         DECKNW=(Issues[key]["DECKNW"])
+        if (DECKNW is None):
+            DECKNW=Issues[key]["DECKNW"] #to keep None object??
+        else: 
+            DECKNW=str((Issues[key]["DECKNW"]))  # str casting needed
         print "DECKNW:{0}".format(DECKNW) 
         
         BLOCKNW=Issues[key]["BLOCKNW"]
@@ -612,6 +621,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             print "SUBTASK PARENT'S ORIGINAL KEY:{0}\nVALUE:{1}".format(SUBPARENTKEY,SUBKEYVALUE)
             #TODO CHECK DUPLICATE REMARKS!!
             
+            SUBKEY=Remarks[subkey]["SUBKEY"] 
+            SUBORIGINALREMARKEY=Remarks[subkey]["SUBORIGINALREMARKEY"] 
             SUBSUMMARY=Remarks[subkey]["SUMMARY"] 
             SUBSUMMARY=SUBSUMMARY.replace("\n", "")
             SUBSUMMARY=SUBSUMMARY[:254]    ## summary max length is 255
@@ -670,7 +681,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             
             print ".................................."
             if (PROD==True):
-                #SubIssueID=CreateSubTask(jira,JIRAPROJECT,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW)
+                #SubIssueID=CreateSubTask(jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW)
                 #print "Created subtask:{0}".format(SubIssueID)
                 #time.sleep(0.5)
                 print "SKIPPED SUBTASK OPERATIONS. SHOULD HAVE CREATED"
@@ -678,6 +689,11 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
                 print "Skipped subtask creation"
             
         print "*************************************************************************"
+      
+      
+    end = time.clock()
+    totaltime=end-start
+    print "Time taken:{0} seconds".format(totaltime) 
         
 #############################################################################
 
