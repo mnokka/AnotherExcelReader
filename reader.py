@@ -19,6 +19,7 @@ from collections import defaultdict
 from author import Authenticate  # no need to use as external command
 from author import DoJIRAStuff
 from CreateIssue import CreateIssue 
+from CreateIssue import CreateSubTask 
 import glob
 import json # for json dumo
 from sqlalchemy.sql.expression import false
@@ -32,6 +33,9 @@ logging.basicConfig(level=logging.INFO) # IF calling from Groovy, this must be s
 
 start = time.clock()
 
+
+#FOR CONFIGURATIONS, SEE Parse FUNCTION
+
 def main(argv):
     
     JIRASERVICE=""
@@ -43,7 +47,7 @@ def main(argv):
 
  
     parser = argparse.ArgumentParser(usage="""
-    {1}    Version:{0}     -  mika.nokka1@gmail.com for Ambientia
+    {1}    Version:{0}     -  mika.nokka1@gmail.com
     
     USAGE:
     -filepath  | -p <Path to Excel file directory>
@@ -99,11 +103,11 @@ def main(argv):
 
 def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTACHDIR):
     
-    #false skips issue creation and other jira operations
-    PROD=True #False
-    ATTACHMENTS=False
-    ENV="DEV" # or "PROD", sets the custom fields
-    
+    # CONFIGURATIONS ##################################################################
+    PROD=True   #false skips issue creation and other jira operations
+    ATTACHMENTS=False   #false skips attachment addition operations
+    ENV="DEV" # or "PROD", sets the custom field IDs 
+    # END OF CONFIGURATIONS ############################################################
     
     
     logging.info ("Filepath: %s     Filename:%s" %(filepath ,filename))
@@ -263,12 +267,6 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             SHIPNUMBER=(CurrentSheet.cell(row=i, column=L).value)
             Issues[KEY]["SHIPNUMBER"] = SHIPNUMBER
             
-            #PERFORMER=(CurrentSheet.cell(row=i, column=P).value)
-            #Issues[KEY]["PERFORMER"] = PERFORMER.encode('utf-8')
-            
-              
-            #RESPHONE=(CurrentSheet.cell(row=i, column=U).value)
-            #Issues[KEY]["RESPHONE"] = RESPHONE
             
             SYSTEMNUMBERNW=(CurrentSheet.cell(row=i, column=M).value)
             Issues[KEY]["SYSTEMNUMBERNW"] = SYSTEMNUMBERNW
@@ -317,14 +315,12 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             #logging.debug("---------------------------------------------------")
             i=i+1
             
-            # ???? key=KEY
+            # TODO IMPLEMENT ME 
             #HandleAttachemnts(filepath,key,ATTACHDIR)
             
     #print Issues
     #print Issues.items() 
-    
     #print(json.dumps(Issues, indent=4, sort_keys=True))
-    
     
     #key=18503 # check if this key exists
     #if key in Issues:
@@ -333,7 +329,6 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     #    print "NOT THERE"
     #for key, value in Issues.iteritems() :
     #    print key, value
-
 
     #print "EXITNG NOW!"
     #sys.exit(5)
@@ -443,8 +438,6 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
                 
                 SUBDECKNW=(SubCurrentSheet.cell(row=i, column=SUB_V).value)
                 Issues[PARENTKEY]["REMARKS"][REMARKKEY]["DECKNW"] = SUBDECKNW
-           
-             
                 #SUBTASKID=REMARKKEY
             
             else:
@@ -456,10 +449,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
  
     print(json.dumps(Issues, indent=4, sort_keys=True))
     
-    
-
-    #print "EXITING NOW ALL DONE"
-    #sys.exit(5)
+   # print "EXITING NOW ALL DONE"
+   # sys.exit(5)
 
     ##########################################################################################################################
     # Create main issues
@@ -563,11 +554,6 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             FIREZONENW=str((Issues[key]["FIREZONENW"]))  # str casting needed
         print "FIREZONENW:{0}".format(FIREZONENW) 
         
-     
-        
-    
-
-        
         
         #IssueID="SHIP-1826" #temp ID
         if (PROD==True):
@@ -584,6 +570,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         print "filesx:{0}".format(filesx)
         
         
+        # TODO IMPLEMENMT AS AN FUNCTION
         if (ATTACHMENTS==True):
             attachments=glob.glob("{0}".format(filesx))
             if (len(attachments) > 0): # if any attachment with key embedded to name found
@@ -600,7 +587,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         
         Remarks=Issues[key]["REMARKS"] # take a copy of remarks and use it
         
-        print "-------------------------------------------------------------------------"
+        print "-----------------------------------------------------------------------------------------------------------------"
         if (PROD==True):
             PARENT=IssueID
         #create subtask(s) under one parent
@@ -619,7 +606,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             else:
                 log.error("Subtask Parent parsing failure")
             print "SUBTASK PARENT'S ORIGINAL KEY:{0}\nVALUE:{1}".format(SUBPARENTKEY,SUBKEYVALUE)
-            #TODO CHECK DUPLICATE REMARKS!!
+       
             
             SUBKEY=Remarks[subkey]["SUBKEY"] 
             SUBORIGINALREMARKEY=Remarks[subkey]["SUBORIGINALREMARKEY"] 
@@ -681,10 +668,10 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             
             print ".................................."
             if (PROD==True):
-                #SubIssueID=CreateSubTask(jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW)
-                #print "Created subtask:{0}".format(SubIssueID)
-                #time.sleep(0.3)
-                print "SKIPPED SUBTASK OPERATIONS. SHOULD HAVE CREATED"
+                SubIssueID=CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW)
+                print "Created subtask:{0}".format(SubIssueID)
+                time.sleep(0.3)
+                #print "SKIPPED SUBTASK OPERATIONS. SHOULD HAVE CREATED"
             else:
                 print "Skipped subtask creation"
             

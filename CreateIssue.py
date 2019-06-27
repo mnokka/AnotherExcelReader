@@ -235,7 +235,7 @@ def CustomFieldSetter(new_issue,CUSTOMFIELDNAME,CUSTOMFIELDVALUE):
 ############################################################################################'
 # Quick way to create subtask
 #
-def CreateSubTask(jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW):
+def CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW):
     jiraobj=jira
     project=JIRAPROJECT
  
@@ -244,18 +244,19 @@ def CreateSubTask(jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSU
     'project': {'key': JIRAPROJECT},
 
     'summary': SUBSUMMARY,
-    'description': JIRASUBDESCRIPTION,
-    'issuetype': {'name': SUBTASKTYPE}, #  is a Sub-task type CHANGE FOR target system
+    'description': SUBDESCRIPTION,
+    'issuetype': {'name': SUBISSUTYPE}, #  is a Sub-task type CHANGE FOR target system
     'parent' : { 'id' : str(PARENT)},   # PARENT is an object, convert  SUBISSUETYPE
 
 
-    'customfield_14612' if (ENV =="DEV") else 'customfield_14212' : str(SHIP),
-    'customfield_14607' if (ENV =="DEV") else 'customfield_14212' : str(PERFORMERNW),
+    'customfield_14612' if (ENV =="DEV") else 'customfield_14212' : str(SUBSHIPNUMBER),
+    'customfield_14607' if (ENV =="DEV") else 'customfield_14212' : str(SUBPERFORMER),
+    'customfield_14615' if (ENV =="DEV") else 'customfield_14212' : str(SUBREPORTERNW),
     
-    'customfield_10013' if (ENV =="DEV") else 'customfield_14212' : str(INSPECTEDTIME),
+    'customfield_10013' if (ENV =="DEV") else 'customfield_14212' : str(SUBINSPECTION),
     'customfield_14609' if (ENV =="DEV") else 'customfield_14212' : str(SUBCREATED),
     'customfield_14614' if (ENV =="DEV") else 'customfield_14212' : str(SUBORIGINALREMARKEY),
-    'customfield_12906' if (ENV =="DEV") else 'customfield_14212' : str(RESPONSIBLENW), 
+    'customfield_12906' if (ENV =="DEV") else 'customfield_14212' : str(SUBRESPONSIBLENW), 
 
 
     }
@@ -278,37 +279,20 @@ def CreateSubTask(jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSU
             print "Updating SUBTASK ASSIGNEE" 
             new_issue.update(assignee={'name': SUBASSIGNEE})        
             
-            print "Updating RESPONSIBLE"    
-            if (RESPONSIBLE is None):
-                new_issue.update(notify=False,fields={"customfield_10049": {"id": "-1"}})  # user selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
-            else:
-                new_issue.update(notify=False,fields={"customfield_10049": {'name': RESPONSIBLE}})   
-                
+          
                 
             
-            CustomFieldSetter(new_issue,"customfield_14608" ,DEPARTMENTNW) 
-            
-            CustomFieldSetter(new_issue,"customfield_10010" ,DEPARTMENT)
-           
-            CustomFieldSetter(new_issue,"customfield_14606" ,STATUSNW)  
-            CustomFieldSetter(new_issue,"customfield_14605" ,SYSTEM)       
-                    
-            CustomFieldSetter(new_issue,"customfield_14604" ,ISSUETYPENW)
-            CustomFieldSetter(new_issue,"customfield_14603" ,BLOCKNW)
-            
-            CustomFieldSetter(new_issue,"customfield_14601" ,DECKNW)
-            CustomFieldSetter(new_issue,"customfield_14602" ,FIREZONENW)
-            
-            
-           
-       
-           
-            
-            
+            CustomFieldSetter(new_issue,"customfield_14604" ,SUBISSUTYPENW)
+            CustomFieldSetter(new_issue,"customfield_14606" ,SUBSTATUSNW) 
+            CustomFieldSetter(new_issue,"customfield_14605" ,SUBSYSTEMNUMBERNW)     
+            CustomFieldSetter(new_issue,"customfield_14608" ,SUBDEPARTMENTNW) 
+            CustomFieldSetter(new_issue,"customfield_10010" ,SUBDEPARTMENT)
+            CustomFieldSetter(new_issue,"customfield_14603" ,SUBBLOCKNW)
+            CustomFieldSetter(new_issue,"customfield_14601" ,SUBDECKNW)
             
         elif (ENV =="PROD"):
             DEPARTMENTNWTFIELD="customfield_14328" 
-            new_issue.update(fields={DEPARTMENTNWTFIELD: {'value' : DEPARTMENTNW}})  
+            new_issue.update(fields={DEPARTMENTNWTFIELD: {'value' : SUBDEPARTMENTNW}})  
             
             DEPARTMENTFIELD="customfield_14328" 
             new_issue.update(fields={DEPARTMENTFIELD: {'value' : DEPARTMENT}}) 
@@ -330,16 +314,22 @@ def CreateSubTask(jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSU
         
         
         
-        if (STATUS != "Todo"): # initial status after creation
+        if (SUBSTATUS != "Todo" ): # initial status after creation
             
             #map state to neede transit. Assunming WF supports thse transit (do for example admin only transit possibilty for migration)
-            if (STATUS=="Closed"):
+            if (SUBSTATUS=="Closed"):
                 TRANSIT="CLOSED"
-            if (STATUS=="Inspected"):
+            if (SUBSTATUS=="Inspected"):
                 TRANSIT="INSPECTED"
            
+            #subtask state transits from initla state, cahgen accorging real WF
+            if (SUBSTATUS=="open"):
+                TRANSIT="OPEN"
+            if (SUBSTATUS=="resolved"):
+                TRANSIT="RESOLVED"
             
-            print "Newstatus will be:{0}".format(STATUS)
+            
+            print "Subtask newstatus will be:{0}".format(SUBSTATUS)
             print "===> Executing transit:{0}".format(TRANSIT)
             jiraobj.transition_issue(new_issue, transition=TRANSIT)  # trantsit to state where it was in excel
         else:
