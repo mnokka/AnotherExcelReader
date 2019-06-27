@@ -574,7 +574,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             IssueID=CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATUS,STATUSNW,PRIORITY,RESPONSIBLENW,RESPONSIBLE,INSPECTEDTIME,SHIP,SYSTEMNUMBERNW,SYSTEM,PERFORMERNW,DEPARTMENTNW,DEPARTMENT,DESCRIPTION,AREA,SURVEYOR,DECKNW,BLOCKNW,FIREZONENW)
             print "Created issue:{0}  OK".format(IssueID)
             print "-----------------------------------------------------------"
-            time.sleep(0.5)
+            time.sleep(0.3) 
             #sys.exit(1)
             #print "IssueKey:{0}".format(IssueID.key)
         else:
@@ -683,7 +683,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             if (PROD==True):
                 #SubIssueID=CreateSubTask(jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW)
                 #print "Created subtask:{0}".format(SubIssueID)
-                #time.sleep(0.5)
+                #time.sleep(0.3)
                 print "SKIPPED SUBTASK OPERATIONS. SHOULD HAVE CREATED"
             else:
                 print "Skipped subtask creation"

@@ -150,7 +150,7 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
             CustomFieldSetter(new_issue,"customfield_10010" ,DEPARTMENT)
            
             CustomFieldSetter(new_issue,"customfield_14606" ,STATUSNW)  
-            CustomFieldSetter(new_issue,"customfield_14605" ,SYSTEM)       
+            CustomFieldSetter(new_issue,"customfield_14605" ,SYSTEMNUMBERNW)       
                     
             CustomFieldSetter(new_issue,"customfield_14604" ,ISSUETYPENW)
             CustomFieldSetter(new_issue,"customfield_14603" ,BLOCKNW)
@@ -248,12 +248,13 @@ def CreateSubTask(jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSU
     'issuetype': {'name': SUBTASKTYPE}, #  is a Sub-task type CHANGE FOR target system
     'parent' : { 'id' : str(PARENT)},   # PARENT is an object, convert  SUBISSUETYPE
 
-    'customfield_14613' if (ENV =="DEV") else 'customfield_14212' : str(SYSTEM),
+
     'customfield_14612' if (ENV =="DEV") else 'customfield_14212' : str(SHIP),
     'customfield_14607' if (ENV =="DEV") else 'customfield_14212' : str(PERFORMERNW),
     
     'customfield_10013' if (ENV =="DEV") else 'customfield_14212' : str(INSPECTEDTIME),
-    'customfield_12900' if (ENV =="DEV") else 'customfield_14212' : str(KEY),
+    'customfield_14609' if (ENV =="DEV") else 'customfield_14212' : str(SUBCREATED),
+    'customfield_14614' if (ENV =="DEV") else 'customfield_14212' : str(SUBORIGINALREMARKEY),
     'customfield_12906' if (ENV =="DEV") else 'customfield_14212' : str(RESPONSIBLENW), 
 
 
@@ -274,19 +275,8 @@ def CreateSubTask(jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSU
         # all custom fields could be objects with certain values for certain environments
         if (ENV =="DEV"):
                       
-            print "Updating AREA"          
-            if (AREA is None):
-                new_issue.update(notify=False,fields={"customfield_10007":[ {"id": "-1"}]})  # multiple selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
-            else:
-                new_issue.update(notify=False,fields={"customfield_10007": [{"value": AREA}]})
-                
-            print "Updating AREA"          
-            if (AREA is None):
-                new_issue.update(notify=False,fields={"customfield_10007":[ {"id": "-1"}]})  # multiple selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
-            else:
-                new_issue.update(notify=False,fields={"customfield_10007": [{"value": AREA}]})    
-                
-                
+            print "Updating SUBTASK ASSIGNEE" 
+            new_issue.update(assignee={'name': SUBASSIGNEE})        
             
             print "Updating RESPONSIBLE"    
             if (RESPONSIBLE is None):
