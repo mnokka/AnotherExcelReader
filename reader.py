@@ -105,7 +105,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     
     # CONFIGURATIONS ##################################################################
     PROD=True   #false skips issue creation and other jira operations
-    ATTACHMENTS=False   #false skips attachment addition operations
+    ATTACHMENTS=True   #false skips attachment addition operations
     ENV="DEV" # or "PROD", sets the custom field IDs 
     # END OF CONFIGURATIONS ############################################################
     
@@ -565,29 +565,21 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             print "Created issue:{0}  OK".format(IssueID)
             print "-----------------------------------------------------------"
             time.sleep(0.1) 
+            if (ATTACHMENTS==True):
+                HandleAttachemnts(filepath,key,ATTACHDIR,IssueID,jira)
+            else:
+                print "Skipped attachments operation, check internal configs"
+        
             #sys.exit(1)
             #print "IssueKey:{0}".format(IssueID.key)
         else:
            print "--> SKIPPED ISSUE CREATION" 
         
-        filesx=filepath+"/*{0}*".format(key)
-        print "filesx:{0}".format(filesx)
+        #filesx=filepath+"/*{0}*".format(key)
+        #print "filesx:{0}".format(filesx)
         
         
-        # TODO IMPLEMENMT AS AN FUNCTION
-        if (ATTACHMENTS==True):
-            attachments=glob.glob("{0}".format(filesx))
-            if (len(attachments) > 0): # if any attachment with key embedded to name found
-                print "Found attachments for key:{0}".format(IssueID)
-                print "Found these:{0}".format(attachments)
-                for item in attachments: # add them all
-                    jira.add_attachment(issue=IssueID, attachment=attachments[0])
-                    print "Attachment:{0} added".format(item)
-                    time.sleep(0.1)
-            else:
-                print "NO attachments  found for key:{0}".format(IssueID)
-        else:
-            print "Skipped Attachment operations"
+        
         
         Remarks=Issues[key]["REMARKS"] # take a copy of remarks and use it
         
@@ -688,20 +680,66 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         
 #############################################################################
 
-def HandleAttachemnts(filepath,key,ATTACHDIR):
-        filesx=ATTACHDIR+"/*{0}*".format(key)
+def HandleAttachemnts(filepath,key,ATTACHDIR,IssueID,jira):
+        filesx=ATTACHDIR+"/*_No{0}_*".format(key)
+        filesz=ATTACHDIR+"/*-Nr. {0}.*".format(key)
+        print "************** ATTACHMENT OPERATION ************************"
         print "filesx:{0}".format(filesx)
+        print "filesz:{0}".format(filesz)
         
-        
-        attachments=glob.glob("{0}".format(filesx))
+        tobeadded=[]
+        attachmentsx=glob.glob("{0}".format(filesx))
+        attachmentsz=glob.glob("{0}".format(filesz))
+        attachments=attachmentsx+attachmentsz
         if (len(attachments) > 0): # if any attachment with key embedded to name found
             print "===> Found attachments for key:{0}".format(key)
-            print "Found these:{0}".format(attachments)
+            #print "Found these:{0}".format(attachments)
+            for i in attachments:
+                            print "-->{0}".format(i)
+                            tobeadded.append(i)
             #for item in attachments: # add them all
             #    jira.add_attachment(issue=IssueID, attachment=attachments[0])
             #    print "Attachment:{0} added".format(item)
         else:
-            print "NO attachments  found for original key:{0}".format(key)
+            print "No single attachments  found for original key:{0}".format(key)
+            
+                   
+        # intentionally used separately
+        for dir, dirs, files in os.walk(ATTACHDIR):
+            
+            FindDir = re.search( r"(.*)(_No)(\d*)(_)(.*)", dir) # remove unique _ROWNUJMBER identifier
+            if FindDir:
+                CurrentGroups=FindDir.groups()    
+                #print ("Group 1: %s" % CurrentGroups[0]) 
+                #print ("Group 2: %s" % CurrentGroups[1]) 
+                HITDIR=CurrentGroups[2] #directoryu with key embedded to its name 
+
+                if (int(HITDIR)==int(key)):
+                    #print "!!!!!!!!!!!!!!!!!!! HITDIR FOUND:{0}".format(HITDIR)
+                    print "Found attachments for key:{0} in directory:{1}".format(key,dir)
+                    findallfiles=dir+"/*"
+                    dirattachments=glob.glob("{0}".format(findallfiles))
+                    if (len(dirattachments) > 0): # if any attachment with key embedded to name found
+                        #GREEDY. FIX USING REG EXPR
+                        for i in dirattachments:
+                            print "-->{0}".format(i)
+                            tobeadded.append(i)                    
+                        #sys.exit(1)
+
+        if (len(tobeadded) > 0):
+            for i in tobeadded:
+                print "Adding attachment-->{0}".format(i)
+                #print "ADD ATTACHMENT TO JIR ACOMMANDF AND DELAY HERE" 
+                try:
+                    jira.add_attachment(issue=IssueID, attachment=i)
+                    time.sleep(1) #needed ?
+                except Exception,e:
+                    print("Failed wtih UPDATE JIRA object, error: %s" % e)
+                    print "Issue was:{0}".format(IssueID)
+                    sys.exit(1)
+        else:
+            print "No attachments found"
+            
         print "******************************************************************************************************************"
 
     
