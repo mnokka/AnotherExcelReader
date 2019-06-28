@@ -13,7 +13,10 @@ Attacments have ID number embedded to their file name (excel1 includes ID number
 
 
 
-This tool provides necessary routines to handle Excels using Python and creating issues and attachments to Jira according rules above. It is provided only as a reference how to use Python for import operations
+This tool provides necessary routines to handle Excels using Python and creating issues and attachments to Jira according rules above. It is provided only as a reference how to use Python for import operations 
 
+
+
+USAGE:  python reader.py -f . -n "main_issues.xlsx" -u JIRAUSERNAME -w JIRAPASSWORD -s https://USED.JIRA.COM -p "JIRAPROJECTKEY" -m "subtasks.xlsx" -a "ATTACHMENTS_DIRECTORY"
 
 
