@@ -25,6 +25,7 @@ import json # for json dumo
 from sqlalchemy.sql.expression import false
 import re
 import time
+import os
  
 __version__ = "0.1.1396"
 
@@ -695,8 +696,13 @@ def HandleAttachemnts(filepath,key,ATTACHDIR,IssueID,jira):
             print "===> Found attachments for key:{0}".format(key)
             #print "Found these:{0}".format(attachments)
             for i in attachments:
-                            print "-->{0}".format(i)
-                            tobeadded.append(i)
+                            if (os.path.isfile(i)):
+                                print "-->{0}".format(i)
+                                tobeadded.append(i)
+                            elif (os.path.isdir(i)):
+                                print "Skipping directory only:{0}".format(i)
+                            else:
+                                print "Totally confused when checking file vs. dir data. Help!"
             #for item in attachments: # add them all
             #    jira.add_attachment(issue=IssueID, attachment=attachments[0])
             #    print "Attachment:{0} added".format(item)
