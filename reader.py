@@ -545,6 +545,10 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         print "DECKNW:{0}".format(DECKNW) 
         
         BLOCKNW=Issues[key]["BLOCKNW"]
+        if (BLOCKNW is None):
+            BLOCKNW=Issues[key]["BLOCKNW"] #to keep None object??
+        else: 
+            BLOCKNW=str((Issues[key]["BLOCKNW"]))  # str casting needed
         print "BLOCKNW:{0}".format(BLOCKNW) 
         
         FIREZONENW=Issues[key]["FIREZONENW"]
