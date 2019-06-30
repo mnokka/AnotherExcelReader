@@ -105,11 +105,12 @@ def main(argv):
 def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTACHDIR):
     
     # CONFIGURATIONS ##################################################################
-    PROD=True   #false skips issue creation and other jira operations
-    ATTACHMENTS=True   #false skips attachment addition operations
+    PROD=False #True   #false skips issue creation and other jira operations
+    ATTACHMENTS=False    #True   #false skips attachment addition operations
     ENV="DEV" # or "PROD", sets the custom field IDs 
+    AUTH=True
     # END OF CONFIGURATIONS ############################################################
-    
+    IMPORT=False
     
     logging.info ("Filepath: %s     Filename:%s" %(filepath ,filename))
     files=filepath+"/"+filename
@@ -455,7 +456,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
 
     ##########################################################################################################################
     # Create main issues
-    if (PROD==True):    
+    
+    if (AUTH==True):    
         Authenticate(JIRASERVICE,PSWD,USER)
         jira=DoJIRAStuff(USER,PSWD,JIRASERVICE)
     else:
@@ -466,6 +468,29 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         KEYVALUE=(key,value)
         KEY=key
         print "ORIGINAL ISSUE KEY:{0}\nVALUE:{1}".format(KEY,KEYVALUE)
+        
+        # check if issue has been imported in previous import attempts
+        if (ENV=="DEV"):
+            JQLQuery="project = {0}  and cf[12900]  ~ {1}".format(JIRAPROJECT,key) # check key in Jira
+            results=jira.search_issues(JQLQuery, maxResults=3000)
+        elif (ENV=="PROD"):
+            print "NOT IMPLEMENTED PROD CODE"
+            sys.exit(1)
+        else:
+            print "ENV SET WRONG"
+            sys.exit(1)
+               
+        if (len(results) > 0):
+            print "Key:{0} exists in Jira already".format(key)
+            print "Query result:{0}".format(results)
+            IMPORT=False
+        else:
+            print "Key:{0} is a NEW Key,going to import".format(key)
+            print "Query result:{0}".format(results)    
+            IMPORT=True
+             
+            
+        
         REMARKS=Issues[key]["REMARKS"]
         print "REMARKS:{0}".format(REMARKS)
         
@@ -562,17 +587,20 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         
         #IssueID="SHIP-1826" #temp ID
         if (PROD==True):
-            IssueID=CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATUS,STATUSNW,PRIORITY,RESPONSIBLENW,RESPONSIBLE,INSPECTEDTIME,SHIP,SYSTEMNUMBERNW,SYSTEM,PERFORMERNW,DEPARTMENTNW,DEPARTMENT,DESCRIPTION,AREA,SURVEYOR,DECKNW,BLOCKNW,FIREZONENW)
-            print "Created issue:{0}  OK".format(IssueID)
-            print "-----------------------------------------------------------"
-            time.sleep(0.1) 
-            if (ATTACHMENTS==True):
-                HandleAttachemnts(filepath,key,ATTACHDIR,IssueID,jira)
-            else:
-                print "Skipped attachments operation, check internal configs"
+            if (IMPORT==True):
+                IssueID=CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATUS,STATUSNW,PRIORITY,RESPONSIBLENW,RESPONSIBLE,INSPECTEDTIME,SHIP,SYSTEMNUMBERNW,SYSTEM,PERFORMERNW,DEPARTMENTNW,DEPARTMENT,DESCRIPTION,AREA,SURVEYOR,DECKNW,BLOCKNW,FIREZONENW)
+                print "Created issue:{0}  OK".format(IssueID)
+                print "-----------------------------------------------------------"
+                time.sleep(0.1) 
+                if (ATTACHMENTS==True):
+                    HandleAttachemnts(filepath,key,ATTACHDIR,IssueID,jira)
+                else:
+                    print "Skipped attachments operation, check internal configs"
         
             #sys.exit(1)
             #print "IssueKey:{0}".format(IssueID.key)
+            else:
+                print "Issue exists in Jira. Did nothing"
         else:
            print "--> SKIPPED ISSUE CREATION" 
         
@@ -665,10 +693,12 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             
             print ".................................."
             if (PROD==True):
-                SubIssueID=CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW)
-                print "Created subtask:{0}".format(SubIssueID)
-                time.sleep(0.1)
+                if (IMPORT==True):
+                    SubIssueID=CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUBISSUTYPENW,SUBISSUTYPE,SUBSTATUSNW,SUBSTATUS,SUBREPORTERNW,SUBCREATED,SUBDESCRIPTION,SUBSHIPNUMBER,SUBSYSTEMNUMBERNW,SUBPERFORMER,SUBRESPONSIBLENW,SUBASSIGNEE,SUBINSPECTION,SUBDEPARTMENTNW,SUBDEPARTMENT,SUBBLOCKNW,SUBDECKNW)
+                    print "Created subtask:{0}".format(SubIssueID)
+                    time.sleep(0.1)
                 #print "SKIPPED SUBTASK OPERATIONS. SHOULD HAVE CREATED"
+                print "Issue exists in Jira. Did no subtask operations"
             else:
                 print "Skipped subtask creation"
             
