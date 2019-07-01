@@ -105,10 +105,10 @@ def main(argv):
 def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTACHDIR):
     
     # CONFIGURATIONS ##################################################################
-    PROD=False #True   #false skips issue creation and other jira operations
-    ATTACHMENTS=False    #True   #false skips attachment addition operations
+    PROD=True #True   #false skips issue creation and other jira operations
+    ATTACHMENTS=True    #True   #false skips attachment addition operations
     ENV="DEV" # or "PROD", sets the custom field IDs 
-    AUTH=True
+    AUTH=True # so jira authorizations
     # END OF CONFIGURATIONS ############################################################
     IMPORT=False
     
@@ -613,7 +613,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         Remarks=Issues[key]["REMARKS"] # take a copy of remarks and use it
         
         print "-----------------------------------------------------------------------------------------------------------------"
-        if (PROD==True):
+        if (PROD==True and IMPORT==True):
             PARENT=IssueID
         #create subtask(s) under one parent
         # custom ids in comments: 1) dev 2) production
