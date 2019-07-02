@@ -239,6 +239,10 @@ def CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUB
     jiraobj=jira
     project=JIRAPROJECT
  
+    if (SUBSUMMARY==""):
+        SUBSUMMARY="NA"
+        
+ 
     print "Creating subtask for JIRA project: {0} Parent:{1}".format(project,PARENT)
     issue_dict = {
     'project': {'key': JIRAPROJECT},
