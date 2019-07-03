@@ -192,10 +192,16 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
         if (STATUS != "Todo"): # initial status after creation
             
             #map state to neede transit. Assunming WF supports thse transit (do for example admin only transit possibilty for migration)
-            if (STATUS=="Closed"):
-                TRANSIT="CLOSED"
-            if (STATUS=="Inspected"):
-                TRANSIT="INSPECTED"
+            if (ENV=="DEV"):
+                if (STATUS=="Closed"):
+                    TRANSIT="CLOSED"
+                if (STATUS=="Inspected"):
+                    TRANSIT="INSPECTED"
+            elif (ENV=="PROD"):
+                if (STATUS=="Closed"):
+                    TRANSIT="AUTOMATION_CLOSED"
+                if (STATUS=="Inspected"):
+                    TRANSIT="AUTOMATION_INSPECTED"
            
             
             print "Newstatus will be:{0}".format(STATUS)
@@ -318,19 +324,25 @@ def CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUB
         
         
         
-        if (SUBSTATUS != "Todo" ): # initial status after creation
+        if (SUBSTATUS != "Open" ): # initial status after creation
             
             #map state to neede transit. Assunming WF supports thse transit (do for example admin only transit possibilty for migration)
-            if (SUBSTATUS=="Closed"):
-                TRANSIT="CLOSED"
-            if (SUBSTATUS=="Inspected"):
-                TRANSIT="INSPECTED"
+            #if (SUBSTATUS=="Closed"):
+            #    TRANSIT="CLOSED"
+            #if (SUBSTATUS=="Inspected"):
+            #    TRANSIT="INSPECTED"
            
             #subtask state transits from initla state, cahgen accorging real WF
-            if (SUBSTATUS=="open"):
-                TRANSIT="OPEN"
-            if (SUBSTATUS=="resolved"):
-                TRANSIT="RESOLVED"
+            if (ENV=="DEV"):
+                if (SUBSTATUS=="open"):
+                    TRANSIT="OPEN"
+                if (SUBSTATUS=="resolved"):
+                    TRANSIT="RESOLVED"
+            elif (ENV=="PROD"):
+                if (SUBSTATUS=="open"):
+                    TRANSIT="AUTOMATION_OPEN"
+                if (SUBSTATUS=="resolved"):
+                    TRANSIT="AUTOMATION_RESOLVED"
             
             
             print "Subtask newstatus will be:{0}".format(SUBSTATUS)
