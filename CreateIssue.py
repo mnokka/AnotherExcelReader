@@ -103,13 +103,13 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
     'issuetype': {'name': ISSUETYPE},
     'priority': {'name': PRIORITY},
     
-    'customfield_14613' if (ENV =="DEV") else 'customfield_14212' : str(SYSTEM),
-    'customfield_14612' if (ENV =="DEV") else 'customfield_14212' : str(SHIP),
-    'customfield_14607' if (ENV =="DEV") else 'customfield_14212' : str(PERFORMERNW),
+    'customfield_14613' if (ENV =="DEV") else 'customfield_14615' : str(SYSTEM),
+    'customfield_14612' if (ENV =="DEV") else 'customfield_14603' : str(SHIP),
+    'customfield_14607' if (ENV =="DEV") else 'customfield_14605' : str(PERFORMERNW),
     
-    'customfield_10013' if (ENV =="DEV") else 'customfield_14212' : str(INSPECTEDTIME),
-    'customfield_12900' if (ENV =="DEV") else 'customfield_14212' : str(KEY),
-    'customfield_12906' if (ENV =="DEV") else 'customfield_14212' : str(RESPONSIBLENW),
+    'customfield_10013' if (ENV =="DEV") else 'customfield_10013' : str(INSPECTEDTIME),
+    'customfield_12900' if (ENV =="DEV") else 'customfield_12900' : str(KEY),
+    'customfield_12906' if (ENV =="DEV") else 'customfield_12906' : str(RESPONSIBLENW),
     }
 
     #status
@@ -119,7 +119,6 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
         print "Issue created OK"
         print "Updating now all selection custom fields"
 
-        
         # all custom fields could be objects with certain values for certain environments
         if (ENV =="DEV"):
                       
@@ -128,25 +127,14 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
                 new_issue.update(notify=False,fields={"customfield_10007":[ {"id": "-1"}]})  # multiple selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
             else:
                 new_issue.update(notify=False,fields={"customfield_10007": [{"value": AREA}]})
-                
-           # print "Updating AREA"          
-           # if (AREA is None):
-           #     new_issue.update(notify=False,fields={"customfield_10007":[ {"id": "-1"}]})  # multiple selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
-           # else:
-           #     new_issue.update(notify=False,fields={"customfield_10007": [{"value": AREA}]})    
-                
-                
-            
+         
             print "Updating RESPONSIBLE"    
             if (RESPONSIBLE is None):
                 new_issue.update(notify=False,fields={"customfield_10049": {"id": "-1"}})  # user selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
             else:
                 new_issue.update(notify=False,fields={"customfield_10049": {'name': RESPONSIBLE}})   
                 
-                
-            
-            CustomFieldSetter(new_issue,"customfield_14608" ,DEPARTMENTNW) 
-            
+            CustomFieldSetter(new_issue,"customfield_14608" ,DEPARTMENTNW)    
             CustomFieldSetter(new_issue,"customfield_10010" ,DEPARTMENT)
            
             CustomFieldSetter(new_issue,"customfield_14606" ,STATUSNW)  
@@ -158,28 +146,33 @@ def CreateIssue(ENV,jira,JIRAPROJECT,JIRASUMMARY,KEY,ISSUETYPE,ISSUETYPENW,STATU
             CustomFieldSetter(new_issue,"customfield_14601" ,DECKNW)
             CustomFieldSetter(new_issue,"customfield_14602" ,FIREZONENW)
             
-            
-           
-       
-           
-            
-            
-            
+                  
+              
         elif (ENV =="PROD"):
-            DEPARTMENTNWTFIELD="customfield_14328" 
-            new_issue.update(fields={DEPARTMENTNWTFIELD: {'value' : DEPARTMENTNW}})  
             
-            DEPARTMENTFIELD="customfield_14328" 
-            new_issue.update(fields={DEPARTMENTFIELD: {'value' : DEPARTMENT}}) 
+            print "Updating AREA"          
+            if (AREA is None):
+                new_issue.update(notify=False,fields={"customfield_10007":[ {"id": "-1"}]})  # multiple selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
+            else:
+                new_issue.update(notify=False,fields={"customfield_10007": [{"value": AREA}]})
+         
+            print "Updating RESPONSIBLE"    
+            if (RESPONSIBLE is None):
+                new_issue.update(notify=False,fields={"customfield_14430": {"id": "-1"}})  # user selection, see https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/
+            else:
+                new_issue.update(notify=False,fields={"customfield_14430": {'name': RESPONSIBLE}})   
+                
+            CustomFieldSetter(new_issue,"customfield_14606" ,DEPARTMENTNW)    
+            CustomFieldSetter(new_issue,"customfield_10010" ,DEPARTMENT)
+           
+            CustomFieldSetter(new_issue,"customfield_14602" ,STATUSNW)  
+            CustomFieldSetter(new_issue,"customfield_14613" ,SYSTEMNUMBERNW)       
+                    
+            CustomFieldSetter(new_issue,"customfield_14614" ,ISSUETYPENW)
+            CustomFieldSetter(new_issue,"customfield_14612" ,BLOCKNW)
             
-            STATUSNWFIELD="customfield_14328" 
-            new_issue.update(fields={STATUSNWFIELD: {'value' : STATUSNW}}) 
-            
-            ISSUTYPENWFIELD="customfield_14328" 
-            new_issue.update(fields={ISSUTYPENWFIELD: {'value' : ISSUETYPENW}})
-            
-            SYSTEMNUMBERNWFIELD="customfield_14328" 
-            new_issue.update(fields={SYSTEMNUMBERNWFIELD: {'value' : SYSTEM}})
+            CustomFieldSetter(new_issue,"customfield_14610" ,DECKNW)
+            CustomFieldSetter(new_issue,"customfield_14611" ,FIREZONENW)
             
     
        
@@ -259,14 +252,14 @@ def CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUB
     'parent' : { 'id' : str(PARENT)},   # PARENT is an object, convert  SUBISSUETYPE
 
 
-    'customfield_14612' if (ENV =="DEV") else 'customfield_14212' : str(SUBSHIPNUMBER),
-    'customfield_14607' if (ENV =="DEV") else 'customfield_14212' : str(SUBPERFORMER),
-    'customfield_14615' if (ENV =="DEV") else 'customfield_14212' : str(SUBREPORTERNW),
+    'customfield_14612' if (ENV =="DEV") else 'customfield_14603' : str(SUBSHIPNUMBER),
+    'customfield_14607' if (ENV =="DEV") else 'customfield_14605' : str(SUBPERFORMER),
+    'customfield_14615' if (ENV =="DEV") else 'customfield_14616' : str(SUBREPORTERNW),
     
-    'customfield_10013' if (ENV =="DEV") else 'customfield_14212' : str(SUBINSPECTION),
-    'customfield_14609' if (ENV =="DEV") else 'customfield_14212' : str(SUBCREATED),
-    'customfield_14614' if (ENV =="DEV") else 'customfield_14212' : str(SUBORIGINALREMARKEY),
-    'customfield_12906' if (ENV =="DEV") else 'customfield_14212' : str(SUBRESPONSIBLENW), 
+    'customfield_10013' if (ENV =="DEV") else 'customfield_10013' : str(SUBINSPECTION),
+    'customfield_14609' if (ENV =="DEV") else 'customfield_14608' : str(SUBCREATED),
+    'customfield_14614' if (ENV =="DEV") else 'customfield_14609' : str(SUBORIGINALREMARKEY),
+    'customfield_12906' if (ENV =="DEV") else 'customfield_12906' : str(SUBRESPONSIBLENW), 
 
 
     }
@@ -288,10 +281,7 @@ def CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUB
                       
             print "Updating SUBTASK ASSIGNEE" 
             new_issue.update(assignee={'name': SUBASSIGNEE})        
-            
-          
-                
-            
+                   
             CustomFieldSetter(new_issue,"customfield_14604" ,SUBISSUTYPENW)
             CustomFieldSetter(new_issue,"customfield_14606" ,SUBSTATUSNW) 
             CustomFieldSetter(new_issue,"customfield_14605" ,SUBSYSTEMNUMBERNW)     
@@ -301,20 +291,17 @@ def CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUB
             CustomFieldSetter(new_issue,"customfield_14601" ,SUBDECKNW)
             
         elif (ENV =="PROD"):
-            DEPARTMENTNWTFIELD="customfield_14328" 
-            new_issue.update(fields={DEPARTMENTNWTFIELD: {'value' : SUBDEPARTMENTNW}})  
             
-            DEPARTMENTFIELD="customfield_14328" 
-            new_issue.update(fields={DEPARTMENTFIELD: {'value' : DEPARTMENT}}) 
-            
-            STATUSNWFIELD="customfield_14328" 
-            new_issue.update(fields={STATUSNWFIELD: {'value' : STATUSNW}}) 
-            
-            ISSUTYPENWFIELD="customfield_14328" 
-            new_issue.update(fields={ISSUTYPENWFIELD: {'value' : ISSUETYPENW}})
-            
-            SYSTEMNUMBERNWFIELD="customfield_14328" 
-            new_issue.update(fields={SYSTEMNUMBERNWFIELD: {'value' : SYSTEM}})
+            print "Updating SUBTASK ASSIGNEE" 
+            new_issue.update(assignee={'name': SUBASSIGNEE})        
+                   
+            CustomFieldSetter(new_issue,"customfield_14614" ,SUBISSUTYPENW)
+            CustomFieldSetter(new_issue,"customfield_14602" ,SUBSTATUSNW) 
+            CustomFieldSetter(new_issue,"customfield_14613" ,SUBSYSTEMNUMBERNW)     
+            CustomFieldSetter(new_issue,"customfield_14606" ,SUBDEPARTMENTNW) 
+            CustomFieldSetter(new_issue,"customfield_10010" ,SUBDEPARTMENT)
+            CustomFieldSetter(new_issue,"customfield_14612" ,SUBBLOCKNW)
+            CustomFieldSetter(new_issue,"customfield_14610" ,SUBDECKNW)
             
     
        
