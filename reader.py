@@ -107,7 +107,7 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
     # CONFIGURATIONS ##################################################################
     PROD=True #True   #false skips issue creation and other jira operations
     ATTACHMENTS=True    #True   #false skips attachment addition operations
-    ENV="DEV" # or "PROD", sets the custom field IDs 
+    ENV="PROD" # or "PROD" or "DEV", sets the custom field IDs 
     AUTH=True # so jira authorizations
     # END OF CONFIGURATIONS ############################################################
     IMPORT=False
@@ -464,7 +464,11 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
         print "Simulated execution only"
 
     #create main issues
+    i=1
     for key, value in Issues.iteritems() :
+        #if (i>20):
+        #    print "EXIT DUE i"
+        #    sys.exit(1)
         KEYVALUE=(key,value)
         KEY=key
         print "ORIGINAL ISSUE KEY:{0}\nVALUE:{1}".format(KEY,KEYVALUE)
@@ -474,8 +478,11 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
             JQLQuery="project = {0}  and cf[12900]  ~ {1}".format(JIRAPROJECT,key) # check key in Jira
             results=jira.search_issues(JQLQuery, maxResults=3000)
         elif (ENV=="PROD"):
-            print "NOT IMPLEMENTED PROD CODE"
-            sys.exit(1)
+            #print "NOT IMPLEMENTED PROD CODE"
+            #sys.exit(1)
+            JQLQuery="project = {0}  and cf[12900]  ~ {1}".format(JIRAPROJECT,key) # check key in Jira
+            results=jira.search_issues(JQLQuery, maxResults=3000)
+            
         else:
             print "ENV SET WRONG"
             sys.exit(1)
@@ -701,7 +708,8 @@ def Parse(filepath, filename,JIRASERVICE,JIRAPROJECT,PSWD,USER,subfilename,ATTAC
                 print "Issue exists in Jira. Did no subtask operations"
             else:
                 print "Skipped subtask creation"
-            
+        
+        i=i+1    
         print "*************************************************************************"
       
       
