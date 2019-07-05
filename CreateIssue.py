@@ -257,7 +257,7 @@ def CreateSubTask(ENV,jira,JIRAPROJECT,PARENT,SUBORIGINALREMARKEY,SUBSUMMARY,SUB
     'customfield_14615' if (ENV =="DEV") else 'customfield_14616' : str(SUBREPORTERNW),
     
     'customfield_10013' if (ENV =="DEV") else 'customfield_10013' : str(SUBINSPECTION),
-    'customfield_14609' if (ENV =="DEV") else 'customfield_14608' : str(SUBCREATED),
+    'customfield_14609' if (ENV =="DEV") else 'customfield_14607' : str(SUBCREATED),
     'customfield_14614' if (ENV =="DEV") else 'customfield_14609' : str(SUBORIGINALREMARKEY),
     'customfield_12906' if (ENV =="DEV") else 'customfield_12906' : str(SUBRESPONSIBLENW), 
 
